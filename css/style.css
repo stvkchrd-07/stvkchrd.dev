@@ -1,0 +1,205 @@
+/* Base Styles */
+body { 
+    font-family: 'Inter', sans-serif; 
+    background-color: #FFFFFF; 
+    color: #000000; 
+    -webkit-font-smoothing: antialiased; 
+    -moz-osx-font-smoothing: grayscale; 
+    overflow-x: hidden; 
+}
+
+/* Three.js Canvas Background */
+#bg-canvas { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    z-index: -1; 
+}
+
+/* Brutalist Hover Effect */
+.brutalist-hover { 
+    transition: none; 
+}
+.brutalist-hover:hover { 
+    background-color: #000000; 
+    color: #FFFFFF; 
+    cursor: pointer; 
+}
+
+/* Universal Sharp Corners */
+* { 
+    border-radius: 0 !important; 
+}
+
+/* Content Wrapper */
+.content-wrapper { 
+    position: relative; 
+    z-index: 1; 
+    background-color: transparent; 
+}
+
+/* Loading Screen Styles */
+#loader { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background-color: #FFFFFF; 
+    z-index: 100; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    flex-direction: column; 
+}
+#loader-text { 
+    font-family: 'Inter', sans-serif; 
+    font-weight: 900; 
+    font-size: 5vw; 
+    color: #000000; 
+}
+#loader-bar-container { 
+    width: 80%; 
+    max-width: 400px; 
+    height: 8px; 
+    border: 1px solid #000; 
+    margin-top: 20px; 
+}
+#loader-bar { 
+    width: 0%; 
+    height: 100%; 
+    background-color: #000; 
+}
+
+/* Project Modal Styles */
+#project-modal { 
+    display: none; 
+    position: fixed; 
+    z-index: 50; 
+    left: 0; 
+    top: 0; 
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgba(255, 255, 255, 0.8); 
+    backdrop-filter: blur(5px); 
+}
+.modal-content { 
+    background-color: #fff; 
+    margin: 10% auto; 
+    padding: 2rem; 
+    border: 2px solid #000; 
+    width: 90%; 
+    max-width: 700px; 
+    position: relative; 
+}
+.close-button { 
+    position: absolute; 
+    top: 1rem; 
+    right: 1rem; 
+    font-size: 2rem; 
+    font-weight: 900; 
+    cursor: pointer; 
+    line-height: 1; 
+}
+
+/* Copy Toast Notification Styles */
+#copy-toast {
+    visibility: hidden;
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #000;
+    color: #fff;
+    padding: 10px 20px;
+    z-index: 101;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+#copy-toast.show {
+    visibility: visible;
+    opacity: 1;
+}
+.pivot-experiment, .lekh-title {
+    font-family: 'Inter', 'Arial Black', 'Arial', sans-serif;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #111;
+    font-size: 1.25rem !important;      /* Decreased base size */
+    font-weight: 900;
+}
+@media (min-width: 768px) {
+    .pivot-experiment, .lekh-title {
+        font-size: 1.5rem !important;  /* Decreased md size */
+    }
+}
+/* Reduce header name size */
+header .font-black.text-5xl,
+header .font-black.text-6xl,
+header .font-black.text-7xl {
+    font-size: 2.25rem !important;     /* ~text-3xl */
+}
+@media (min-width: 640px) {
+    header .font-black.text-5xl,
+    header .font-black.text-6xl,
+    header .font-black.text-7xl {
+        font-size: 2.5rem !important;  /* ~text-4xl */
+    }
+}
+@media (min-width: 768px) {
+    header .font-black.text-5xl,
+    header .font-black.text-6xl,
+    header .font-black.text-7xl {
+        font-size: 3rem !important;    /* ~text-5xl */
+    }
+}
+/* Reduce blog post title size */
+#blog-posts h2.font-black {
+    font-size: 1.5rem !important;      /* ~text-2xl */
+}
+@media (min-width: 768px) {
+    #blog-posts h2.font-black {
+        font-size: 1.75rem !important; /* ~text-3xl */
+    }
+}
+/* Reduce blog post content size */
+#blog-posts p.text-lg {
+    font-size: 1rem !important;
+}
+/* Reduce section title size */
+#projects h2.font-black,
+#blog-posts h2.font-black {
+    font-size: 1.5rem !important;
+}
+@media (min-width: 768px) {
+    #projects h2.font-black,
+    #blog-posts h2.font-black {
+        font-size: 1.75rem !important;
+    }
+}
+/* Reduce padding in cards and wrappers */
+.border-2.p-6,
+.border-2.p-8 {
+    padding: 1rem !important;
+}
+@media (min-width: 768px) {
+    .border-2.p-6,
+    .border-2.p-8 {
+        padding: 1.5rem !important;
+    }
+}
+.content-wrapper {
+    padding: 0.5rem !important;
+}
+footer, header {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+}
+footer .mb-2, header .mt-2 {
+    margin-bottom: 0.5rem !important;
+    margin-top: 0.5rem !important;
+}

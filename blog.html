@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog | Your Name</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Your Custom Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="p-4 md:p-8">
+
+    <!-- Three.js Background -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Main Content -->
+    <div class="content-wrapper max-w-7xl mx-auto">
+        <header class="mb-12 md:mb-20">
+            <div class="flex flex-col md:flex-row justify-between md:items-center border-b-2 border-black pb-4 mb-4">
+                <a href="./index.html" class="font-black text-5xl sm:text-6xl md:text-7xl tracking-tighter hover:underline">Satvik Chaturvedi</a>
+                <nav class="mt-4 md:mt-0">
+                    <ul class="flex space-x-2">
+                         <li><a href="https://x.com/StvkChrd" target="_blank" class="brutalist-hover block border-2 border-black p-3 font-bold" title="X (Twitter)">X</a></li>
+                        <li><a href="https://www.linkedin.com/in/stvkchrd" target="_blank" class="brutalist-hover block border-2 border-black p-3 font-bold" title="LinkedIn">in</a></li>
+                        <li><a href="mailto:your.email@example.com" class="brutalist-hover block border-2 border-black p-3 font-bold" title="Mail">@</a></li>
+                        <li><a href="./blog.html" class="brutalist-hover block border-2 border-black px-4 py-3 font-bold bg-black text-white">BLOG</a></li>
+                    </ul>
+                </nav>
+            </div>
+            <p class="lekh-title text-2xl md:text-3xl font-extrabold mt-2">लेख </p>
+        </header>
+
+        <main>
+            <section id="blog-posts">
+                <div class="space-y-8">
+                    <!-- Blog Post 1 -->
+                    <div class="border-2 border-black p-6 md:p-8 bg-white/80 backdrop-blur-sm">
+                        <p class="text-base mb-2">August 10, 2025</p>
+                        <h2 class="font-black text-3xl md:text-4xl mb-4">On the Nature of Raw Design</h2>
+                        <p class="text-lg mb-4">Brutalism isn't about being ugly; it's about being honest. It's a conscious rejection of ornamentation in favor of showcasing the raw, underlying structure of a design. In a digital world saturated with gradients and drop shadows, a brutalist approach feels like a breath of fresh, unfiltered air...</p>
+                        <a href="#" class="font-bold underline hover:no-underline">Read More &rarr;</a>
+                    </div>
+                    <!-- Blog Post 2 -->
+                    <div class="border-2 border-black p-6 md:p-8 bg-white/80 backdrop-blur-sm">
+                        <p class="text-base mb-2">July 28, 2025</p>
+                        <h2 class="font-black text-3xl md:text-4xl mb-4">Why I Chose a Monospaced Font</h2>
+                        <p class="text-lg mb-4">Every character in a monospaced font occupies the same amount of horizontal space. This was originally a technical necessity for typewriters and early computers. Today, it's a design choice. It imparts a sense of order, structure, and a connection to the foundational logic of computing...</p>
+                        <a href="#" class="font-bold underline hover:no-underline">Read More &rarr;</a>
+                    </div>
+                     <!-- Blog Post 3 -->
+                    <div class="border-2 border-black p-6 md:p-8 bg-white/80 backdrop-blur-sm">
+                        <p class="text-base mb-2">July 15, 2025</p>
+                        <h2 class="font-black text-3xl md:text-4xl mb-4">Function Over Form: A Manifesto</h2>
+                        <p class="text-lg mb-4">What is the primary purpose of a website? To deliver information. When aesthetics get in the way of that function, the design has failed, no matter how beautiful it is. This post explores the idea of prioritizing usability and clarity above all else, and how that philosophy can lead to more powerful user experiences...</p>
+                        <a href="#" class="font-bold underline hover:no-underline">Read More &rarr;</a>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="mt-20 pt-8 border-t-2 border-black bg-white/80 backdrop-blur-sm">
+            <div class="text-center">
+                <p class="mb-2">
+                    <span onclick="copyEmailToClipboard('satvikc73@gmail.com')" class="underline hover:no-underline cursor-pointer">satvikc73@gmail.com</span>
+                </p>
+                <p>© 2025 Your Name. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Toast Notification Element -->
+    <div id="copy-toast"></div>
+    
+    <!-- Your Custom JavaScript -->
+    <script src="js/blog.js"></script>
+</body>
+</html>
