@@ -41,6 +41,7 @@
             color: #000;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="p-4 md:p-8 bg-gray-100">
 
@@ -54,11 +55,9 @@
 
         <main class="grid grid-cols-1 lg:grid-cols-2 gap-12">
 
-            <!-- MANAGE PROJECTS SECTION -->
             <section id="manage-projects">
                 <h2 class="font-black text-3xl md:text-4xl mb-6">Manage Projects</h2>
                 
-                <!-- Form for adding a new project -->
                 <div class="border-2 border-black p-6 bg-white mb-8">
                     <h3 class="font-black text-2xl mb-4">Add New Project</h3>
                     <form id="add-project-form">
@@ -71,30 +70,15 @@
                     </form>
                 </div>
 
-                <!-- List of existing projects (to be populated by JS) -->
                 <h3 class="font-black text-2xl mb-4">Existing Projects</h3>
                 <div id="existing-projects-list" class="space-y-4">
-                    <!-- Example of a project item -->
-                    <div class="border-2 border-black p-4 bg-white flex justify-between items-center">
-                        <div>
-                            <h4 class="font-bold text-xl">Project Title One</h4>
-                            <p>2024 - Web Application</p>
-                        </div>
-                        <div>
-                            <button class="underline mr-4">Edit</button>
-                            <button class="underline text-red-600">Delete</button>
-                        </div>
                     </div>
-                    <!-- This list will be dynamically filled -->
-                </div>
             </section>
 
-            <!-- MANAGE BLOG SECTION -->
             <section id="manage-blog">
                 <h2 class="font-black text-3xl md:text-4xl mb-6">Manage Blog</h2>
 
-                <!-- Form for adding a new blog post -->
-                 <div class="border-2 border-black p-6 bg-white mb-8">
+                <div class="border-2 border-black p-6 bg-white mb-8">
                     <h3 class="font-black text-2xl mb-4">Add New Blog Post</h3>
                     <form id="add-blog-form">
                         <input type="text" id="blog-title" placeholder="Blog Post Title" class="admin-input" required>
@@ -104,27 +88,13 @@
                     </form>
                 </div>
 
-                <!-- List of existing blog posts (to be populated by JS) -->
                 <h3 class="font-black text-2xl mb-4">Existing Posts</h3>
                 <div id="existing-posts-list" class="space-y-4">
-                     <!-- Example of a blog post item -->
-                    <div class="border-2 border-black p-4 bg-white flex justify-between items-center">
-                        <div>
-                            <h4 class="font-bold text-xl">On the Nature of Raw Design</h4>
-                            <p>August 10, 2025</p>
-                        </div>
-                        <div>
-                            <button class="underline mr-4">Edit</button>
-                            <button class="underline text-red-600">Delete</button>
-                        </div>
-                    </div>
-                     <!-- This list will be dynamically filled -->
-                </div>
+                     </div>
             </section>
         </main>
     </div>
 
-    <!-- Your Custom JavaScript for the admin page -->
     <script src="js/admin.js"></script>
 </body>
 </html>
