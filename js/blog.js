@@ -1,19 +1,23 @@
 // js/blog.js
 
-// --- SUPABASE INITIALIZATION ---
-// IMPORTANT: Replace these with your actual Supabase Project URL and Anon Key
-const SUPABASE_URL = window.env.SUPABASE_URL;
-const SUPABASE_ANON_KEY = window.env.SUPABASE_ANON_KEY;
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// --- GLOBAL VARIABLES ---
+let supabase;
 
 // --- EVENT LISTENERS ---
 document.addEventListener('DOMContentLoaded', () => {
-    // This will now fetch blog posts from your database when the page loads
+    // 1. INITIALIZE SUPABASE CLIENT (This now runs safely after the page loads)
+    const SUPABASE_URL = window.env.SUPABASE_URL;
+    const SUPABASE_ANON_KEY = window.env.SUPABASE_ANON_KEY;
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // 2. LOAD DYNAMIC CONTENT
     loadPublicBlogPosts();
 });
 
 // --- DYNAMIC BLOG POST LOADING ---
 async function loadPublicBlogPosts() {
+    if (!supabase) return; // Don't run if supabase isn't initialized
+
     const { data: posts, error } = await supabase.from('posts').select('*').order('date', { ascending: false });
     if (error) {
         console.error('Error fetching posts:', error);
@@ -21,14 +25,13 @@ async function loadPublicBlogPosts() {
     }
 
     const postsContainer = document.querySelector('#blog-posts .space-y-8');
-    if (!postsContainer) return; // Exit if the container isn't on the page
+    if (!postsContainer) return;
 
-    postsContainer.innerHTML = ''; // Clear any hardcoded posts
+    postsContainer.innerHTML = ''; // Clear hardcoded posts
 
     posts.forEach(post => {
         const postDiv = document.createElement('div');
         postDiv.className = 'border-2 border-black p-6 md:p-8 bg-white/80 backdrop-blur-sm';
-        // Displaying a summary. A full "Read More" would require a separate page for each post.
         const summary = post.content.substring(0, 250) + '...'; 
         postDiv.innerHTML = `
             <p class="text-base mb-2">${new Date(post.date).toLocaleDateString()}</p>

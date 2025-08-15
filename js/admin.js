@@ -4,19 +4,21 @@
 =====================================================================
 */
 
-// 1. INITIALIZE SUPABASE CLIENT
-// IMPORTANT: Make sure these are correct
-const SUPABASE_URL = window.env.SUPABASE_URL;
-const SUPABASE_ANON_KEY = window.env.SUPABASE_ANON_KEY; 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// --- GLOBAL VARIABLES ---
+let supabase;
 
 // --- EVENT LISTENERS ---
 document.addEventListener('DOMContentLoaded', () => {
-    // When the page loads, fetch and display existing content
+    // 1. INITIALIZE SUPABASE CLIENT (This now runs safely after the page loads)
+    const SUPABASE_URL = window.env.SUPABASE_URL;
+    const SUPABASE_ANON_KEY = window.env.SUPABASE_ANON_KEY;
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // 2. LOAD DYNAMIC CONTENT
     loadProjects();
     loadBlogPosts();
 
-    // Add event listeners to the forms
+    // 3. ATTACH FORM LISTENERS
     const addProjectForm = document.getElementById('add-project-form');
     addProjectForm.addEventListener('submit', handleAddProject);
 
@@ -27,17 +29,17 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- PROJECT MANAGEMENT ---
 
 async function loadProjects() {
+    if (!supabase) return;
+
     const { data: projects, error } = await supabase.from('projects').select('*').order('id', { ascending: false });
     
-    // DEBUG: Check the console for errors or data
     if (error) {
         console.error('Error fetching projects:', error);
         return;
     }
-    console.log("Projects fetched from Supabase:", projects); // Check if data arrives here
 
     const projectList = document.getElementById('existing-projects-list');
-    projectList.innerHTML = ''; // Clear the list first
+    projectList.innerHTML = '';
 
     if (!projects || projects.length === 0) {
         projectList.innerHTML = '<p>No projects found. Add one using the form above.</p>';
@@ -47,7 +49,6 @@ async function loadProjects() {
     projects.forEach(project => {
         const projectElement = document.createElement('div');
         projectElement.className = 'border-2 border-black p-4 bg-white flex justify-between items-center';
-        // CORRECTED: Added quotes around the project.id in the onclick function
         projectElement.innerHTML = `
             <div>
                 <h4 class="font-bold text-xl">${project.title}</h4>
@@ -63,6 +64,8 @@ async function loadProjects() {
 
 async function handleAddProject(event) {
     event.preventDefault();
+    if (!supabase) return;
+
     const newProject = {
         title: document.getElementById('project-title').value,
         subtitle: document.getElementById('project-subtitle').value,
@@ -83,6 +86,7 @@ async function handleAddProject(event) {
 
 async function deleteProject(id) {
     if (confirm('Are you sure you want to delete this project?')) {
+        if (!supabase) return;
         const { error } = await supabase.from('projects').delete().match({ id: id });
         if (error) {
             console.error('Error deleting project:', error);
@@ -96,6 +100,8 @@ async function deleteProject(id) {
 // --- BLOG POST MANAGEMENT ---
 
 async function loadBlogPosts() {
+    if (!supabase) return;
+
     const { data: posts, error } = await supabase.from('posts').select('*').order('date', { ascending: false });
     if (error) {
         console.error('Error fetching posts:', error);
@@ -113,7 +119,6 @@ async function loadBlogPosts() {
     posts.forEach(post => {
         const postElement = document.createElement('div');
         postElement.className = 'border-2 border-black p-4 bg-white flex justify-between items-center';
-        // CORRECTED: Added quotes around the post.id in the onclick function
         postElement.innerHTML = `
             <div>
                 <h4 class="font-bold text-xl">${post.title}</h4>
@@ -129,6 +134,8 @@ async function loadBlogPosts() {
 
 async function handleAddBlogPost(event) {
     event.preventDefault();
+    if (!supabase) return;
+
     const newPost = {
         title: document.getElementById('blog-title').value,
         date: document.getElementById('blog-date').value,
@@ -147,6 +154,7 @@ async function handleAddBlogPost(event) {
 
 async function deletePost(id) {
     if (confirm('Are you sure you want to delete this post?')) {
+        if (!supabase) return;
         const { error } = await supabase.from('posts').delete().match({ id: id });
         if (error) {
             console.error('Error deleting post:', error);

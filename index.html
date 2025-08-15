@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Name | Brutalist Portfolio</title>
+    <title>Satvik Chaturvedi | Portfolio</title>
     
     <!-- External Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -11,16 +11,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
     <!-- Vercel Environment Variables -->
-<script>
-    window.env = {
-        SUPABASE_URL: 'PLACEHOLDER_SUPABASE_URL',
-        SUPABASE_ANON_KEY: 'PLACEHOLDER_SUPABASE_ANON_KEY'
-    };
-</script>
+    <script>
+        window.env = {
+            SUPABASE_URL: 'PLACEHOLDER_SUPABASE_URL',
+            SUPABASE_ANON_KEY: 'PLACEHOLDER_SUPABASE_ANON_KEY'
+        };
+    </script>
+    
+    <!-- Supabase Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <!-- Your Custom Stylesheet -->
     <link rel="stylesheet" href="css/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="p-4 md:p-8">
 
@@ -55,7 +59,7 @@
                     <ul class="flex space-x-2">
                         <li><a href="https://x.com/StvkChrd" target="_blank" class="brutalist-hover block border-2 border-black p-3 font-bold" title="X (Twitter)">X</a></li>
                         <li><a href="https://www.linkedin.com/in/stvkchrd" target="_blank" class="brutalist-hover block border-2 border-black p-3 font-bold" title="LinkedIn">in</a></li>
-                        <li><a href="mailto:your.email@example.com" class="brutalist-hover block border-2 border-black p-3 font-bold" title="Mail">@</a></li>
+                        <li><a href="mailto:satvikc73@gmail.com" class="brutalist-hover block border-2 border-black p-3 font-bold" title="Mail">@</a></li>
                         <li><a href="./blog.html" class="brutalist-hover block border-2 border-black px-4 py-3 font-bold">BLOG</a></li>
                     </ul>
                 </nav>
@@ -67,10 +71,7 @@
             <section id="projects">
                 <h2 class="font-black text-4xl md:text-5xl mb-6">Projects</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div onclick="openModal('Project Title One', 'This is a detailed description of Project One. It was a challenging but rewarding web application built with modern technologies to solve a real-world problem.', 'https://placehold.co/800x450/000000/FFFFFF?text=Project+One', 'https://example.com')" class="brutalist-hover border-2 border-black p-6 bg-white/80 backdrop-blur-sm"><h3 class="font-black text-2xl md:text-3xl">Project Title One</h3><p class="mt-1 text-base">2024 - Web Application</p></div>
-                    <div onclick="openModal('Another Major Project', 'This project involved creating a sleek and functional mobile app for both iOS and Android. The focus was on user experience and performance.', 'https://placehold.co/800x450/000000/FFFFFF?text=Project+Two', 'https://example.com')" class="brutalist-hover border-2 border-black p-6 bg-white/80 backdrop-blur-sm"><h3 class="font-black text-2xl md:text-3xl">Another Major Project</h3><p class="mt-1 text-base">2023 - Mobile App</p></div>
-                    <div onclick="openModal('Experimental Design', 'A deep dive into brutalist and minimalist design principles. This project explored the power of typography and raw aesthetics in branding.', 'https://placehold.co/800x450/000000/FFFFFF?text=Project+Three', 'https://example.com')" class="brutalist-hover border-2 border-black p-6 bg-white/80 backdrop-blur-sm"><h3 class="font-black text-2xl md:text-3xl">Experimental Design</h3><p class="mt-1 text-base">2023 - Branding</p></div>
-                    <div onclick="openModal('E-Commerce Platform', 'A full-featured e-commerce platform with a custom backend, payment integration, and an admin dashboard for managing products.', 'https://placehold.co/800x450/000000/FFFFFF?text=Project+Four', 'https://example.com')" class="brutalist-hover border-2 border-black p-6 bg-white/80 backdrop-blur-sm"><h3 class="font-black text-2xl md:text-3xl">E-Commerce Platform</h3><p class="mt-1 text-base">2022 - Full Stack</p></div>
+                    <!-- Projects will be dynamically loaded here by main.js -->
                 </div>
             </section>
         </main>
@@ -80,7 +81,7 @@
                 <p class="mb-2">
                     <span onclick="copyEmailToClipboard('satvikc73@gmail.com')" class="underline hover:no-underline cursor-pointer">satvikc73@gmail.com</span>
                 </p>
-                <p>© 2025 Your Name. All rights reserved.</p>
+                <p>© 2025 Satvik Chaturvedi. All rights reserved.</p>
             </div>
         </footer>
     </div>

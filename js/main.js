@@ -1,19 +1,23 @@
 // js/main.js
 
-// --- SUPABASE INITIALIZATION ---
-// IMPORTANT: Replace these with your actual Supabase Project URL and Anon Key
-const SUPABASE_URL = window.env.SUPABASE_URL;
-const SUPABASE_ANON_KEY = window.env.SUPABASE_ANON_KEY;
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// --- GLOBAL VARIABLES ---
+let supabase;
 
 // --- EVENT LISTENERS ---
 document.addEventListener('DOMContentLoaded', () => {
-    // This will now fetch projects from your database when the page loads
+    // 1. INITIALIZE SUPABASE CLIENT (This now runs safely after the page loads)
+    const SUPABASE_URL = window.env.SUPABASE_URL;
+    const SUPABASE_ANON_KEY = window.env.SUPABASE_ANON_KEY;
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // 2. LOAD DYNAMIC CONTENT
     loadPublicProjects();
 });
 
 // --- DYNAMIC PROJECT LOADING ---
 async function loadPublicProjects() {
+    if (!supabase) return; // Don't run if supabase isn't initialized
+
     const { data: projects, error } = await supabase.from('projects').select('*').order('id', { ascending: false });
     if (error) {
         console.error('Error fetching projects:', error);
@@ -21,9 +25,9 @@ async function loadPublicProjects() {
     }
 
     const projectsContainer = document.querySelector('#projects .grid');
-    if (!projectsContainer) return; // Exit if the container isn't on the page
+    if (!projectsContainer) return;
     
-    projectsContainer.innerHTML = ''; // Clear any hardcoded projects
+    projectsContainer.innerHTML = ''; // Clear hardcoded projects
 
     projects.forEach(project => {
         const projectDiv = document.createElement('div');
@@ -32,7 +36,6 @@ async function loadPublicProjects() {
             <h3 class="font-black text-2xl md:text-3xl">${project.title}</h3>
             <p class="mt-1 text-base">${project.subtitle}</p>
         `;
-        // This makes the entire div clickable to open the modal with the correct data
         projectDiv.onclick = () => openModal(project.title, project.description, project.imageUrl, project.liveUrl);
         projectsContainer.appendChild(projectDiv);
     });

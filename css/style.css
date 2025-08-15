@@ -171,13 +171,11 @@ header .font-black.text-7xl {
     font-size: 1rem !important;
 }
 /* Reduce section title size */
-#projects h2.font-black,
-#blog-posts h2.font-black {
+#projects h2.font-black {
     font-size: 1.5rem !important;
 }
 @media (min-width: 768px) {
-    #projects h2.font-black,
-    #blog-posts h2.font-black {
+    #projects h2.font-black {
         font-size: 1.75rem !important;
     }
 }
