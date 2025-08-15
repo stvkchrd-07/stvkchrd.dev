@@ -1,24 +1,24 @@
 // js/main.js
 
 // --- GLOBAL VARIABLES ---
-let supabase;
+let supabaseClient;
 
 // --- EVENT LISTENERS ---
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. INITIALIZE SUPABASE CLIENT (This now runs safely after the page loads)
-    const SUPABASE_URL = window.env.SUPABASE_URL;
-    const SUPABASE_ANON_KEY = window.env.SUPABASE_ANON_KEY;
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+    // 1. INITIALIZE SUPABASE CLIENT
+    // Use destructuring for clarity and create a single client instance.
+    const { createClient } = window.supabase;
+    supabaseClient = createClient(window.env.SUPABASE_URL, window.env.SUPABASE_ANON_KEY);
+    
     // 2. LOAD DYNAMIC CONTENT
     loadPublicProjects();
 });
 
 // --- DYNAMIC PROJECT LOADING ---
 async function loadPublicProjects() {
-    if (!supabase) return; // Don't run if supabase isn't initialized
+    if (!supabaseClient) return; // Don't run if supabase isn't initialized
 
-    const { data: projects, error } = await supabase.from('projects').select('*').order('id', { ascending: false });
+    const { data: projects, error } = await supabaseClient.from('projects').select('*').order('id', { ascending: false });
     if (error) {
         console.error('Error fetching projects:', error);
         return;

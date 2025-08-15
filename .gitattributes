@@ -1,0 +1,4 @@
+# Enforce consistent line endings for different file types
+# This ensures cross-platform compatibility.
+
+*.sh text eol=lf

@@ -1,24 +1,24 @@
 // js/blog.js
 
 // --- GLOBAL VARIABLES ---
-let supabase;
+let supabaseClient;
 
 // --- EVENT LISTENERS ---
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. INITIALIZE SUPABASE CLIENT (This now runs safely after the page loads)
-    const SUPABASE_URL = window.env.SUPABASE_URL;
-    const SUPABASE_ANON_KEY = window.env.SUPABASE_ANON_KEY;
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
+    // 1. INITIALIZE SUPABASE CLIENT
+    // Use destructuring for clarity and create a single client instance.
+    const { createClient } = window.supabase;
+    supabaseClient = createClient(window.env.SUPABASE_URL, window.env.SUPABASE_ANON_KEY);
+
     // 2. LOAD DYNAMIC CONTENT
     loadPublicBlogPosts();
 });
 
 // --- DYNAMIC BLOG POST LOADING ---
 async function loadPublicBlogPosts() {
-    if (!supabase) return; // Don't run if supabase isn't initialized
+    if (!supabaseClient) return; // Don't run if supabase isn't initialized
 
-    const { data: posts, error } = await supabase.from('posts').select('*').order('date', { ascending: false });
+    const { data: posts, error } = await supabaseClient.from('posts').select('*').order('date', { ascending: false });
     if (error) {
         console.error('Error fetching posts:', error);
         return;

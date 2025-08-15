@@ -1,3 +1,2 @@
-# Ignore admin files
-admin.html
-js/admin.js
+# Supabase config file - contains secrets.
+js/config.js
