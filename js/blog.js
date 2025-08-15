@@ -2,8 +2,8 @@
 
 // --- SUPABASE INITIALIZATION ---
 // IMPORTANT: Replace these with your actual Supabase Project URL and Anon Key
-const SUPABASE_URL = 'SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'PLACEHOLDER_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'PLACEHOLDER_SUPABASE_ANON_KEY';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // --- EVENT LISTENERS ---
