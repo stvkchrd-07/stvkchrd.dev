@@ -1,24 +1,23 @@
 /*
 =====================================================================
-|                ADMIN PAGE JAVASCRIPT (CORRECTED)                  |
+|                ADMIN PAGE JAVASCRIPT (FUNCTIONAL)                 |
 =====================================================================
 */
 
-// --- GLOBAL VARIABLES ---
-let supabase;
+// 1. INITIALIZE SUPABASE CLIENT
+// IMPORTANT: Replace these with your actual Supabase Project URL and Anon Key
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // --- EVENT LISTENERS ---
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. INITIALIZE SUPABASE CLIENT (This now runs safely after the page loads)
-    const SUPABASE_URL = window.env.SUPABASE_URL;
-    const SUPABASE_ANON_KEY = window.env.SUPABASE_ANON_KEY;
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // 2. LOAD DYNAMIC CONTENT
+    // When the page loads, fetch and display existing content
     loadProjects();
     loadBlogPosts();
 
-    // 3. ATTACH FORM LISTENERS
+    // Add event listeners to the forms
     const addProjectForm = document.getElementById('add-project-form');
     addProjectForm.addEventListener('submit', handleAddProject);
 
@@ -29,19 +28,16 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- PROJECT MANAGEMENT ---
 
 async function loadProjects() {
-    if (!supabase) return;
-
     const { data: projects, error } = await supabase.from('projects').select('*').order('id', { ascending: false });
-    
     if (error) {
         console.error('Error fetching projects:', error);
         return;
     }
 
     const projectList = document.getElementById('existing-projects-list');
-    projectList.innerHTML = '';
+    projectList.innerHTML = ''; // Clear the list first
 
-    if (!projects || projects.length === 0) {
+    if (projects.length === 0) {
         projectList.innerHTML = '<p>No projects found. Add one using the form above.</p>';
         return;
     }
@@ -64,8 +60,6 @@ async function loadProjects() {
 
 async function handleAddProject(event) {
     event.preventDefault();
-    if (!supabase) return;
-
     const newProject = {
         title: document.getElementById('project-title').value,
         subtitle: document.getElementById('project-subtitle').value,
@@ -86,7 +80,6 @@ async function handleAddProject(event) {
 
 async function deleteProject(id) {
     if (confirm('Are you sure you want to delete this project?')) {
-        if (!supabase) return;
         const { error } = await supabase.from('projects').delete().match({ id: id });
         if (error) {
             console.error('Error deleting project:', error);
@@ -100,8 +93,6 @@ async function deleteProject(id) {
 // --- BLOG POST MANAGEMENT ---
 
 async function loadBlogPosts() {
-    if (!supabase) return;
-
     const { data: posts, error } = await supabase.from('posts').select('*').order('date', { ascending: false });
     if (error) {
         console.error('Error fetching posts:', error);
@@ -111,7 +102,7 @@ async function loadBlogPosts() {
     const postList = document.getElementById('existing-posts-list');
     postList.innerHTML = '';
 
-    if (!posts || posts.length === 0) {
+    if (posts.length === 0) {
         postList.innerHTML = '<p>No blog posts found. Add one using the form above.</p>';
         return;
     }
@@ -134,8 +125,6 @@ async function loadBlogPosts() {
 
 async function handleAddBlogPost(event) {
     event.preventDefault();
-    if (!supabase) return;
-
     const newPost = {
         title: document.getElementById('blog-title').value,
         date: document.getElementById('blog-date').value,
@@ -154,7 +143,6 @@ async function handleAddBlogPost(event) {
 
 async function deletePost(id) {
     if (confirm('Are you sure you want to delete this post?')) {
-        if (!supabase) return;
         const { error } = await supabase.from('posts').delete().match({ id: id });
         if (error) {
             console.error('Error deleting post:', error);
