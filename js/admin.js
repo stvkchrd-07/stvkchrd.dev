@@ -9,8 +9,12 @@ let supabaseClient;
 
 // --- EVENT LISTENERS ---
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. INITIALIZE SUPABASE CLIENT
-    // Use destructuring for clarity and create a single client instance.
+    // 1. CHECK CONFIG AND INITIALIZE SUPABASE CLIENT
+    if (!window.env || !window.env.SUPABASE_URL || !window.env.SUPABASE_ANON_KEY) {
+        console.error('Error: Supabase environment variables are not set. Cannot load admin panel.');
+        alert('Configuration error. Please check the console.');
+        return;
+    }
     const { createClient } = window.supabase;
     supabaseClient = createClient(window.env.SUPABASE_URL, window.env.SUPABASE_ANON_KEY);
     
