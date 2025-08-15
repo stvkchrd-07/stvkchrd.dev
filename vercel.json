@@ -1,0 +1,13 @@
+{
+  "rewrites": [
+    {
+      "source": "/js/config.js",
+      "destination": "/api/config"
+    }
+  ],
+  "functions": {
+    "api/config.js": {
+      "runtime": "nodejs18.x"
+    }
+  }
+}
