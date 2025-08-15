@@ -2,8 +2,8 @@
 
 // --- SUPABASE INITIALIZATION ---
 // IMPORTANT: Replace these with your actual Supabase Project URL and Anon Key
-const SUPABASE_URL = 'https://nxhoyxvuyehqnnrqhyom.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im54aG95eHZ1eWVocW5ucnFoeW9tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMDg2OTEsImV4cCI6MjA3MDc4NDY5MX0.pRUwKmZOxBOQCWdJLJLPgIP_YDkXp5iMPUBN2RpHb5I';
+const SUPABASE_URL = 'SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'SUPABASE_ANON_KEY';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // --- EVENT LISTENERS ---
