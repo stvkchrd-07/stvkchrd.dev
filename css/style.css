@@ -1,8 +1,42 @@
 /* Base Styles */
+:root {
+    --bg-color: #FFFFFF;
+    --text-color: #000000;
+    --card-bg: rgba(255, 255, 255, 0.8);
+    --loader-bg: #FFFFFF;
+    --loader-text: #000000;
+    --loader-bar: #000;
+    --modal-bg: rgba(255, 255, 255, 0.8);
+    --modal-content-bg: #fff;
+    --toast-bg: #000;
+    --toast-text: #fff;
+    --lekh-text: #111;
+    --brutalist-hover-bg: #000000;
+    --brutalist-hover-text: #FFFFFF;
+    --particle-color-value: 0x000000;
+}
+
+body.dark {
+    --bg-color: #111111;
+    --text-color: #FFFFFF;
+    --card-bg: rgba(30, 30, 30, 0.8);
+    --loader-bg: #111111;
+    --loader-text: #FFFFFF;
+    --loader-bar: #FFFFFF;
+    --modal-bg: rgba(30, 30, 30, 0.8);
+    --modal-content-bg: #1e1e1e;
+    --toast-bg: #fff;
+    --toast-text: #000;
+    --lekh-text: #eee;
+    --brutalist-hover-bg: #FFFFFF;
+    --brutalist-hover-text: #000000;
+    --particle-color-value: 0xffffff;
+}
+
 body { 
     font-family: 'Inter', sans-serif; 
-    background-color: #FFFFFF; 
-    color: #000000; 
+    background-color: var(--bg-color); 
+    color: var(--text-color); 
     -webkit-font-smoothing: antialiased; 
     -moz-osx-font-smoothing: grayscale; 
     overflow-x: hidden; 
@@ -23,8 +57,8 @@ body {
     transition: none; 
 }
 .brutalist-hover:hover { 
-    background-color: #000000; 
-    color: #FFFFFF; 
+    background-color: var(--brutalist-hover-bg); 
+    color: var(--brutalist-hover-text); 
     cursor: pointer; 
 }
 
@@ -47,7 +81,7 @@ body {
     left: 0; 
     width: 100%; 
     height: 100%; 
-    background-color: #FFFFFF; 
+    background-color: var(--loader-bg); 
     z-index: 100; 
     display: flex; 
     justify-content: center; 
@@ -58,19 +92,19 @@ body {
     font-family: 'Inter', sans-serif; 
     font-weight: 900; 
     font-size: 5vw; 
-    color: #000000; 
+    color: var(--loader-text); 
 }
 #loader-bar-container { 
     width: 80%; 
     max-width: 400px; 
     height: 8px; 
-    border: 1px solid #000; 
+    border: 1px solid var(--text-color); 
     margin-top: 20px; 
 }
 #loader-bar { 
     width: 0%; 
     height: 100%; 
-    background-color: #000; 
+    background-color: var(--loader-bar); 
 }
 
 /* Project Modal Styles */
@@ -83,14 +117,14 @@ body {
     width: 100%; 
     height: 100%; 
     overflow: auto; 
-    background-color: rgba(255, 255, 255, 0.8); 
+    background-color: var(--modal-bg); 
     backdrop-filter: blur(5px); 
 }
 .modal-content { 
-    background-color: #fff; 
+    background-color: var(--modal-content-bg); 
     margin: 10% auto; 
     padding: 2rem; 
-    border: 2px solid #000; 
+    border: 2px solid var(--text-color); 
     width: 90%; 
     max-width: 700px; 
     position: relative; 
@@ -112,8 +146,8 @@ body {
     bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
-    background-color: #000;
-    color: #fff;
+    background-color: var(--toast-bg);
+    color: var(--toast-text);
     padding: 10px 20px;
     z-index: 101;
     font-size: 14px;
@@ -128,7 +162,7 @@ body {
     font-family: 'Inter', 'Arial Black', 'Arial', sans-serif;
     letter-spacing: 0.03em;
     text-transform: uppercase;
-    color: #111;
+    color: var(--lekh-text);
     font-size: 1.25rem !important;      /* Decreased base size */
     font-weight: 900;
 }

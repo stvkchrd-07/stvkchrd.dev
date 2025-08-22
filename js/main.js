@@ -2,10 +2,33 @@
 
 // --- GLOBAL VARIABLES ---
 let supabaseClient;
+let particlesMaterial; // Make particlesMaterial globally accessible
+
+// --- THEME TOGGLE FUNCTIONS ---
+function applyTheme(theme) {
+    document.body.classList.toggle('dark', theme === 'dark');
+    if (particlesMaterial) {
+        const particleColor = getComputedStyle(document.documentElement).getPropertyValue('--particle-color-value').trim();
+        particlesMaterial.color.set(parseInt(particleColor));
+    }
+}
+
+function toggleTheme() {
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('theme', newTheme);
+    applyTheme(newTheme);
+}
 
 // --- EVENT LISTENERS ---
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. CHECK CONFIG AND INITIALIZE SUPABASE CLIENT
+    // 1. SETUP THEME TOGGLE BUTTON
+    const themeToggleButton = document.getElementById('theme-toggle');
+    if (themeToggleButton) {
+        themeToggleButton.addEventListener('click', toggleTheme);
+    }
+
+    // 2. CHECK CONFIG AND INITIALIZE SUPABASE CLIENT
     if (!window.env || !window.env.SUPABASE_URL || !window.env.SUPABASE_ANON_KEY) {
         console.error('Error: Supabase environment variables are not set. Cannot load projects.');
         const projectsContainer = document.querySelector('#projects .grid');
@@ -15,8 +38,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const { createClient } = window.supabase;
     supabaseClient = createClient(window.env.SUPABASE_URL, window.env.SUPABASE_ANON_KEY);
     
-    // 2. LOAD DYNAMIC CONTENT
+    // 3. LOAD DYNAMIC CONTENT
     loadPublicProjects();
+
+    // 4. INITIALIZE THREE.JS AND APPLY THEME
+    initializeThreeJS();
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    applyTheme(savedTheme);
 });
 
 // --- DYNAMIC PROJECT LOADING ---
@@ -118,43 +146,50 @@ function copyEmailToClipboard(email) {
 }
 
 // --- THREE.JS BACKGROUND SCRIPT ---
-const canvas = document.getElementById('bg-canvas');
-if (canvas) {
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 10;
-    const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    const particleCount = 2000; // Less dense
-    const positions = new Float32Array(particleCount * 3);
-    for (let i = 0; i < particleCount * 3; i++) { positions[i] = (Math.random() - 0.5) * 20; }
-    const particlesGeometry = new THREE.BufferGeometry();
-    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const particlesMaterial = new THREE.PointsMaterial({ color: 0x000000, size: 0.02, sizeAttenuation: true });
-    const particles = new THREE.Points(particlesGeometry, particlesMaterial);
-    scene.add(particles);
-    const mouse = new THREE.Vector2();
-    window.addEventListener('mousemove', (event) => { mouse.x = (event.clientX / window.innerWidth) * 2 - 1; mouse.y = -(event.clientY / window.innerHeight) * 2 + 1; });
-    const clock = new THREE.Clock();
-    const animate = () => {
-        const elapsedTime = clock.getElapsedTime();
-        particles.rotation.y = -0.04 * elapsedTime; // Slower
-        particles.rotation.x = -0.04 * elapsedTime; // Slower
-        if(mouse.x !== 0 && mouse.y !== 0){
-            const targetX = mouse.x * 0.2;
-            const targetY = mouse.y * 0.2;
-            particles.rotation.y += (targetX - particles.rotation.y) * 0.01; // Slower
-            particles.rotation.x += (targetY - particles.rotation.x) * 0.01; // Slower
-        }
-        renderer.render(scene, camera);
-        window.requestAnimationFrame(animate);
-    };
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
+function initializeThreeJS() {
+    const canvas = document.getElementById('bg-canvas');
+    if (canvas) {
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 10;
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    });
-    animate();
+        const particleCount = 2000; // Less dense
+        const positions = new Float32Array(particleCount * 3);
+        for (let i = 0; i < particleCount * 3; i++) { positions[i] = (Math.random() - 0.5) * 20; }
+        const particlesGeometry = new THREE.BufferGeometry();
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        
+        // Use the global particlesMaterial variable
+        particlesMaterial = new THREE.PointsMaterial({ size: 0.02, sizeAttenuation: true });
+        const initialColor = getComputedStyle(document.documentElement).getPropertyValue('--particle-color-value').trim();
+        particlesMaterial.color.set(parseInt(initialColor));
+        
+        const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particles);
+        const mouse = new THREE.Vector2();
+        window.addEventListener('mousemove', (event) => { mouse.x = (event.clientX / window.innerWidth) * 2 - 1; mouse.y = -(event.clientY / window.innerHeight) * 2 + 1; });
+        const clock = new THREE.Clock();
+        const animate = () => {
+            const elapsedTime = clock.getElapsedTime();
+            particles.rotation.y = -0.04 * elapsedTime; // Slower
+            particles.rotation.x = -0.04 * elapsedTime; // Slower
+            if(mouse.x !== 0 && mouse.y !== 0){
+                const targetX = mouse.x * 0.2;
+                const targetY = mouse.y * 0.2;
+                particles.rotation.y += (targetX - particles.rotation.y) * 0.01; // Slower
+                particles.rotation.x += (targetY - particles.rotation.x) * 0.01; // Slower
+            }
+            renderer.render(scene, camera);
+            window.requestAnimationFrame(animate);
+        };
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        });
+        animate();
+    }
 }
