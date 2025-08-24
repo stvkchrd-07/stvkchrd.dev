@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. CHECK CONFIG AND INITIALIZE SUPABASE CLIENT
     if (!window.env || !window.env.SUPABASE_URL || !window.env.SUPABASE_ANON_KEY) {
-        console.error('Error: Supabase environment variables are not set. Cannot load projects.');
+        console.warn('Supabase environment variables are not set. Skipping project load.');
         const projectsContainer = document.querySelector('#projects .grid');
         if (projectsContainer) projectsContainer.innerHTML = '<p class="text-red-600">Could not connect to the database. Configuration is missing.</p>';
         return;
@@ -196,7 +196,7 @@ function initializeThreeJS() {
         const particles = new THREE.Points(particlesGeometry, particlesMaterial);
         scene.add(particles);
         const mouse = new THREE.Vector2();
-        window.addEventListener('mousemove', (event) => { mouse.x = (event.clientX / window.innerWidth) * 2 - 1; mouse.y = -(event.clientY / window.innerHeight) * 2 + 1; });
+        window.addEventListener('mousemove', (event) => { mouse.x = (event.clientX / window.innerWidth) * 2 - 1; mouse.y = -(event.clientY / window.innerHeight) * 2 + 1; }, { passive: true });
         const clock = new THREE.Clock();
         const animate = () => {
             const elapsedTime = clock.getElapsedTime();
@@ -216,7 +216,7 @@ function initializeThreeJS() {
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        });
+        }, { passive: true });
         animate();
     }
 }

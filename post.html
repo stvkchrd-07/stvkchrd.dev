@@ -6,20 +6,22 @@
     <title>Blog Post | Satvik Chaturvedi</title>
     
     <!-- External Libraries -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com" defer></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
 
     <!-- Config & Libraries -->
-    <script src="js/config.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> <!-- Markdown Parser -->
+    <script src="js/config.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script> <!-- Markdown Parser -->
 
     <!-- Your Custom Stylesheet -->
     <link rel="icon" type="image/png" href="logo2.png.png">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.min.css">
     <style>
         /* Styles for rendered markdown content */
         .post-content h1, .post-content h2, .post-content h3 {
@@ -106,8 +108,8 @@
                     <p class="mt-2 text-lg">Have a project in mind or just want to say hi?</p>
                 </div>
                 <div class="flex space-x-2">
-                    <a href="https://x.com/StvkChrd" target="_blank" class="brutalist-hover block border-2 border-black p-3 font-bold" title="X (Twitter)">X</a>
-                    <a href="https://www.linkedin.com/in/stvkchrd" target="_blank" class="brutalist-hover block border-2 border-black p-3 font-bold" title="LinkedIn">in</a>
+                    <a href="https://x.com/StvkChrd" target="_blank" rel="noopener" class="brutalist-hover block border-2 border-black p-3 font-bold" title="X (Twitter)">X</a>
+                    <a href="https://www.linkedin.com/in/stvkchrd" target="_blank" rel="noopener" class="brutalist-hover block border-2 border-black p-3 font-bold" title="LinkedIn">in</a>
                     <button onclick="copyEmailToClipboard('satvikc73@gmail.com')" class="brutalist-hover block border-2 border-black p-3 font-bold" title="Copy Email">@</button>
                 </div>
             </div>
@@ -120,53 +122,7 @@
     <!-- Toast Notification for Email Copy -->
     <div id="copy-toast" class="toast">Email copied to clipboard!</div>
 
-    <script src="js/main.js"></script>
-    <script src="js/post.js"></script>
-</body>
-</html>
-                </nav>
-            </div>
-        </header>
-
-        <main>
-            <article id="single-post-container" class="border-2 border-black p-6 md:p-8 bg-white/80 backdrop-blur-sm">
-                <!-- Post will be dynamically loaded here by post.js -->
-                <div id="post-loading"><p class="text-lg">Loading post...</p></div>
-                <div id="post-content-area" class="hidden">
-                    <p id="post-date" class="text-base mb-2"></p>
-                    <h1 id="post-title" class="font-black text-3xl md:text-4xl mb-8"></h1>
-                    <div id="post-body" class="post-content"></div>
-                </div>
-                 <div id="post-not-found" class="hidden">
-                    <h1 class="font-black text-3xl md:text-4xl mb-4">Post Not Found</h1>
-                    <p>Sorry, we couldn't find the post you were looking for.</p>
-                    <a href="./blog.html" class="font-bold underline hover:no-underline mt-4 inline-block">← Back to Blog</a>
-                </div>
-            </article>
-            <div class="h-32 md:h-64 lg:h-96"></div>
-        </main>
-
-        <footer class="mt-20 pt-8 border-t-2 border-black bg-white/80 backdrop-blur-sm">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-                <div>
-                    <h2 class="font-black text-4xl md:text-5xl tracking-tighter">Let's connect.</h2>
-                    <p class="mt-2 text-lg">Have a project in mind or just want to say hi?</p>
-                </div>
-                <div class="flex space-x-2">
-                    <a href="https://x.com/StvkChrd" target="_blank" class="brutalist-hover block border-2 border-black p-3 font-bold" title="X (Twitter)">X</a>
-                    <a href="https://www.linkedin.com/in/stvkchrd" target="_blank" class="brutalist-hover block border-2 border-black p-3 font-bold" title="LinkedIn">in</a>
-                    <button onclick="copyEmailToClipboard('satvikc73@gmail.com')" class="brutalist-hover block border-2 border-black p-3 font-bold" title="Copy Email">@</button>
-                </div>
-            </div>
-            <div class="mt-8 text-center text-sm text-gray-600">
-                <p>&copy; 2024 Satvik Chaturvedi. All Rights Reserved.</p>
-            </div>
-        </footer>
-    </div>
-    
-    <!-- Toast Notification for Email Copy -->
-    <div id="copy-toast" class="toast">Email copied to clipboard!</div>
-
-    <script src="js/post.js"></script>
+    <script src="js/main.min.js" defer></script>
+    <script src="js/post.min.js" defer></script>
 </body>
 </html>
