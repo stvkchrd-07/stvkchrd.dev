@@ -7,7 +7,7 @@ let supabaseClient;
 document.addEventListener('DOMContentLoaded', () => {
     // 1. CHECK CONFIG AND INITIALIZE SUPABASE CLIENT
     if (!window.env || !window.env.SUPABASE_URL || !window.env.SUPABASE_ANON_KEY) {
-        console.error('Error: Supabase environment variables are not set. Cannot load blog posts.');
+        console.warn('Supabase environment variables are not set. Skipping blog load.');
         const postsContainer = document.querySelector('#blog-posts .space-y-8');
         if (postsContainer) postsContainer.innerHTML = '<p class="text-red-600">Could not connect to the database. Configuration is missing.</p>';
         return;
@@ -25,7 +25,7 @@ async function loadPublicBlogPosts() {
 
     const { data: posts, error } = await supabaseClient.from('posts').select('*').order('date', { ascending: false });
     if (error) {
-        console.error('Error fetching posts:', error);
+        console.warn('Error fetching posts:', error);
         return;
     }
 
@@ -77,44 +77,4 @@ function copyEmailToClipboard(email) {
     document.body.removeChild(textArea);
 }
 
-// --- THREE.JS BACKGROUND SCRIPT ---
-const canvas = document.getElementById('bg-canvas');
-if (canvas) {
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 10;
-    const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    const particleCount = 2000; // Less dense
-    const positions = new Float32Array(particleCount * 3);
-    for (let i = 0; i < particleCount * 3; i++) { positions[i] = (Math.random() - 0.5) * 20; }
-    const particlesGeometry = new THREE.BufferGeometry();
-    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const particlesMaterial = new THREE.PointsMaterial({ color: 0x000000, size: 0.02, sizeAttenuation: true });
-    const particles = new THREE.Points(particlesGeometry, particlesMaterial);
-    scene.add(particles);
-    const mouse = new THREE.Vector2();
-    window.addEventListener('mousemove', (event) => { mouse.x = (event.clientX / window.innerWidth) * 2 - 1; mouse.y = -(event.clientY / window.innerHeight) * 2 + 1; });
-    const clock = new THREE.Clock();
-    const animate = () => {
-        const elapsedTime = clock.getElapsedTime();
-        particles.rotation.y = -0.04 * elapsedTime; // Slower
-        particles.rotation.x = -0.04 * elapsedTime; // Slower
-        if(mouse.x !== 0 && mouse.y !== 0){
-            const targetX = mouse.x * 0.2;
-            const targetY = mouse.y * 0.2;
-            particles.rotation.y += (targetX - particles.rotation.y) * 0.01; // Slower
-            particles.rotation.x += (targetY - particles.rotation.x) * 0.01; // Slower
-        }
-        renderer.render(scene, camera);
-        window.requestAnimationFrame(animate);
-    };
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    });
-    animate();
-}
+// Background handled globally by main.js to avoid duplicate initializations

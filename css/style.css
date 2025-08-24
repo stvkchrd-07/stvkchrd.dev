@@ -38,6 +38,16 @@ html, body, header, footer, .content-wrapper, #project-modal .modal-content, #lo
     transition: background-color 300ms ease, color 300ms ease, border-color 300ms ease;
 }
 
+/* Prefer-reduced-motion support */
+@media (prefers-reduced-motion: reduce) {
+    html, body, header, footer, .content-wrapper, #project-modal .modal-content, #loader, #loader-text, #loader-bar, .brutalist-hover, .pivot-experiment, .lekh-title {
+        transition: none !important;
+    }
+    * {
+        scroll-behavior: auto !important;
+    }
+}
+
 body { 
     font-family: 'Inter', sans-serif; 
     background-color: var(--bg-color); 
@@ -45,6 +55,7 @@ body {
     -webkit-font-smoothing: antialiased; 
     -moz-osx-font-smoothing: grayscale; 
     overflow-x: hidden; 
+    scroll-behavior: smooth;
 }
 
 /* Three.js Canvas Background */
