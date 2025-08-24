@@ -13,7 +13,7 @@
     --lekh-text: #111;
     --brutalist-hover-bg: #000000;
     --brutalist-hover-text: #FFFFFF;
-    --particle-color-value: 0x000000;
+    --particle-color-value: #000000;
 }
 
 body.dark {
@@ -30,7 +30,12 @@ body.dark {
     --lekh-text: #eee;
     --brutalist-hover-bg: #FFFFFF;
     --brutalist-hover-text: #000000;
-    --particle-color-value: 0xffffff;
+    --particle-color-value: #ffffff;
+}
+
+/* Smooth theme transitions */
+html, body, header, footer, .content-wrapper, #project-modal .modal-content, #loader, #loader-text, #loader-bar, .brutalist-hover, .pivot-experiment, .lekh-title {
+    transition: background-color 300ms ease, color 300ms ease, border-color 300ms ease;
 }
 
 body { 

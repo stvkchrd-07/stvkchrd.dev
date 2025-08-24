@@ -3,13 +3,38 @@
 // --- GLOBAL VARIABLES ---
 let supabaseClient;
 let particlesMaterial; // Make particlesMaterial globally accessible
+let particleColorAnimationCounter = 0; // Used to cancel in-flight color animations
+
+function getParticleCssColor() {
+    // Read from body so body.dark overrides take effect
+    return getComputedStyle(document.body).getPropertyValue('--particle-color-value').trim();
+}
+
+function animateParticleColorTo(targetCssColor, durationMs = 300) {
+    if (!particlesMaterial || !targetCssColor) return;
+    const targetColor = new THREE.Color(targetCssColor);
+    const startColor = particlesMaterial.color.clone();
+    const startTime = performance.now();
+    const thisAnimationId = ++particleColorAnimationCounter;
+    const tempColor = new THREE.Color();
+    function step(now) {
+        if (thisAnimationId !== particleColorAnimationCounter) return; // superseded
+        const t = Math.min(1, (now - startTime) / durationMs);
+        tempColor.copy(startColor).lerp(targetColor, t);
+        particlesMaterial.color.set(tempColor);
+        if (t < 1) {
+            requestAnimationFrame(step);
+        }
+    }
+    requestAnimationFrame(step);
+}
 
 // --- THEME TOGGLE FUNCTIONS ---
 function applyTheme(theme) {
     document.body.classList.toggle('dark', theme === 'dark');
     if (particlesMaterial) {
-        const particleColor = getComputedStyle(document.documentElement).getPropertyValue('--particle-color-value').trim();
-        particlesMaterial.color.set(parseInt(particleColor));
+        const particleColor = getParticleCssColor();
+        animateParticleColorTo(particleColor, 350);
     }
 }
 
@@ -163,8 +188,10 @@ function initializeThreeJS() {
         
         // Use the global particlesMaterial variable
         particlesMaterial = new THREE.PointsMaterial({ size: 0.02, sizeAttenuation: true });
-        const initialColor = getComputedStyle(document.documentElement).getPropertyValue('--particle-color-value').trim();
-        particlesMaterial.color.set(parseInt(initialColor));
+        const initialColor = getParticleCssColor();
+        if (initialColor) {
+            particlesMaterial.color.set(initialColor);
+        }
         
         const particles = new THREE.Points(particlesGeometry, particlesMaterial);
         scene.add(particles);
