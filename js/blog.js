@@ -3,44 +3,92 @@
 // --- GLOBAL VARIABLES ---
 let supabaseClient;
 
+// Sample blog posts for when Supabase is not configured
+const sampleBlogPosts = [
+    {
+        id: 1,
+        title: "Welcome to My Blog",
+        date: "2025-01-15",
+        content: "This is a sample blog post to demonstrate the website functionality. Replace with your actual blog posts by configuring Supabase or updating the sample data. You can write about your projects, thoughts, or anything you'd like to share with your audience."
+    },
+    {
+        id: 2,
+        title: "Building This Portfolio",
+        date: "2025-01-10",
+        content: "I built this portfolio website using modern web technologies including HTML5, CSS3, JavaScript, and Three.js for the interactive background. The design follows a brutalist aesthetic with clean typography and smooth animations."
+    }
+];
+
 // --- EVENT LISTENERS ---
 document.addEventListener('DOMContentLoaded', () => {
     // 1. CHECK CONFIG AND INITIALIZE SUPABASE CLIENT
-    if (!window.env || !window.env.SUPABASE_URL || !window.env.SUPABASE_ANON_KEY) {
-        console.warn('Supabase environment variables are not set. Skipping blog load.');
-        const postsContainer = document.querySelector('#blog-posts .space-y-8');
-        if (postsContainer) postsContainer.innerHTML = '<p class="text-red-600">Could not connect to the database. Configuration is missing.</p>';
-        return;
+    if (!window.env || !window.env.SUPABASE_URL || !window.env.SUPABASE_ANON_KEY || 
+        window.env.SUPABASE_URL === 'https://your-project.supabase.co' || 
+        window.env.SUPABASE_ANON_KEY === 'your-anon-key-here') {
+        console.warn('Supabase environment variables are not properly configured. Using sample data.');
+        loadSampleBlogPosts();
+    } else {
+        try {
+            const { createClient } = window.supabase;
+            supabaseClient = createClient(window.env.SUPABASE_URL, window.env.SUPABASE_ANON_KEY);
+            loadPublicBlogPosts();
+        } catch (error) {
+            console.error('Error initializing Supabase client:', error);
+            loadSampleBlogPosts();
+        }
     }
-    const { createClient } = window.supabase;
-    supabaseClient = createClient(window.env.SUPABASE_URL, window.env.SUPABASE_ANON_KEY);
-
-    // 2. LOAD DYNAMIC CONTENT
-    loadPublicBlogPosts();
 });
 
 // --- DYNAMIC BLOG POST LOADING ---
 async function loadPublicBlogPosts() {
-    if (!supabaseClient) return; // Don't run if supabase isn't initialized
-
-    const { data: posts, error } = await supabaseClient.from('posts').select('*').order('date', { ascending: false });
-    if (error) {
-        console.warn('Error fetching posts:', error);
+    if (!supabaseClient) {
+        loadSampleBlogPosts();
         return;
     }
 
+    try {
+        const { data: posts, error } = await supabaseClient.from('posts').select('*').order('date', { ascending: false });
+        if (error) {
+            console.warn('Error fetching posts:', error);
+            loadSampleBlogPosts();
+            return;
+        }
+
+        if (!posts || posts.length === 0) {
+            console.log('No blog posts found in database, loading sample data');
+            loadSampleBlogPosts();
+            return;
+        }
+
+        displayBlogPosts(posts);
+    } catch (error) {
+        console.error('Error in loadPublicBlogPosts:', error);
+        loadSampleBlogPosts();
+    }
+}
+
+function loadSampleBlogPosts() {
+    console.log('Loading sample blog posts');
+    displayBlogPosts(sampleBlogPosts);
+}
+
+function displayBlogPosts(posts) {
     const postsContainer = document.querySelector('#blog-posts .space-y-8');
     if (!postsContainer) return;
 
-    postsContainer.innerHTML = ''; // Clear hardcoded posts
+    postsContainer.innerHTML = ''; // Clear existing content
 
     posts.forEach(post => {
         const postDiv = document.createElement('div');
         postDiv.className = 'border-2 border-black p-6 md:p-8 bg-white/80 backdrop-blur-sm';
         
-        // Create a summary and parse it as Markdown
+        // Create a summary and parse it as Markdown if marked is available
         const summaryMarkdown = post.content.substring(0, 250) + (post.content.length > 250 ? '...' : '');
-        const summaryHtml = marked.parse(summaryMarkdown);
+        let summaryHtml = summaryMarkdown;
+        
+        if (window.marked) {
+            summaryHtml = marked.parse(summaryMarkdown);
+        }
 
         postDiv.innerHTML = `
             <p class="text-base mb-2">${new Date(post.date).toLocaleDateString()}</p>

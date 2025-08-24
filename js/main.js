@@ -5,6 +5,24 @@ let supabaseClient;
 let particlesMaterial; // Make particlesMaterial globally accessible
 let particleColorAnimationCounter = 0; // Used to cancel in-flight color animations
 
+// Sample projects for when Supabase is not configured
+const sampleProjects = [
+    {
+        title: "Portfolio Website",
+        subtitle: "2025 - Personal Website",
+        description: "A modern, responsive portfolio website built with HTML, CSS, and JavaScript. Features include dark/light theme toggle, Three.js particle background, and dynamic content loading.",
+        imageUrl: "https://via.placeholder.com/600x400/000000/FFFFFF?text=Portfolio+Website",
+        liveUrl: "#"
+    },
+    {
+        title: "Sample Project",
+        subtitle: "2025 - Web Application",
+        description: "This is a sample project to demonstrate the website functionality. Replace with your actual projects by configuring Supabase or updating the sample data.",
+        imageUrl: "https://via.placeholder.com/600x400/333333/FFFFFF?text=Sample+Project",
+        liveUrl: "#"
+    }
+];
+
 function getParticleCssColor() {
     // Read from body so body.dark overrides take effect
     return getComputedStyle(document.body).getPropertyValue('--particle-color-value').trim();
@@ -54,19 +72,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 2. CHECK CONFIG AND INITIALIZE SUPABASE CLIENT
-    if (!window.env || !window.env.SUPABASE_URL || !window.env.SUPABASE_ANON_KEY) {
-        console.warn('Supabase environment variables are not set. Skipping project load.');
-        const projectsContainer = document.querySelector('#projects .grid');
-        if (projectsContainer) projectsContainer.innerHTML = '<p class="text-red-600">Could not connect to the database. Configuration is missing.</p>';
-        return;
+    if (!window.env || !window.env.SUPABASE_URL || !window.env.SUPABASE_ANON_KEY || 
+        window.env.SUPABASE_URL === 'https://your-project.supabase.co' || 
+        window.env.SUPABASE_ANON_KEY === 'your-anon-key-here') {
+        console.warn('Supabase environment variables are not properly configured. Using sample data.');
+        loadSampleProjects();
+    } else {
+        try {
+            const { createClient } = window.supabase;
+            supabaseClient = createClient(window.env.SUPABASE_URL, window.env.SUPABASE_ANON_KEY);
+            loadPublicProjects();
+        } catch (error) {
+            console.error('Error initializing Supabase client:', error);
+            loadSampleProjects();
+        }
     }
-    const { createClient } = window.supabase;
-    supabaseClient = createClient(window.env.SUPABASE_URL, window.env.SUPABASE_ANON_KEY);
-    
-    // 3. LOAD DYNAMIC CONTENT
-    loadPublicProjects();
 
-    // 4. INITIALIZE THREE.JS AND APPLY THEME
+    // 3. INITIALIZE THREE.JS AND APPLY THEME
     initializeThreeJS();
     const savedTheme = localStorage.getItem('theme') || 'light';
     applyTheme(savedTheme);
@@ -74,22 +96,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // --- DYNAMIC PROJECT LOADING ---
 async function loadPublicProjects() {
-    if (!supabaseClient) return; // Don't run if supabase isn't initialized
-
-    const { data: projects, error } = await supabaseClient.from('projects').select('*').order('id', { ascending: false });
-    if (error) {
-        console.error('Error fetching projects:', error);
+    if (!supabaseClient) {
+        loadSampleProjects();
         return;
     }
 
+    try {
+        const { data: projects, error } = await supabaseClient.from('projects').select('*').order('id', { ascending: false });
+        if (error) {
+            console.error('Error fetching projects:', error);
+            loadSampleProjects();
+            return;
+        }
+
+        if (!projects || projects.length === 0) {
+            console.log('No projects found in database, loading sample data');
+            loadSampleProjects();
+            return;
+        }
+
+        displayProjects(projects);
+    } catch (error) {
+        console.error('Error in loadPublicProjects:', error);
+        loadSampleProjects();
+    }
+}
+
+function loadSampleProjects() {
+    console.log('Loading sample projects');
+    displayProjects(sampleProjects);
+}
+
+function displayProjects(projects) {
     const projectsContainer = document.querySelector('#projects .grid');
     if (!projectsContainer) return;
     
-    projectsContainer.innerHTML = ''; // Clear hardcoded projects
+    projectsContainer.innerHTML = ''; // Clear existing content
 
     projects.forEach(project => {
         const projectDiv = document.createElement('div');
-        projectDiv.className = 'brutalist-hover border-2 border-black p-6 bg-white/80 backdrop-blur-sm';
+        projectDiv.className = 'brutalist-hover border-2 border-black p-6 bg-white/80 backdrop-blur-sm cursor-pointer';
         projectDiv.innerHTML = `
             <h3 class="font-black text-2xl md:text-3xl">${project.title}</h3>
             <p class="mt-1 text-base">${project.subtitle}</p>

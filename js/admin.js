@@ -10,25 +10,59 @@ let supabaseClient;
 // --- EVENT LISTENERS ---
 document.addEventListener('DOMContentLoaded', () => {
     // 1. CHECK CONFIG AND INITIALIZE SUPABASE CLIENT
-    if (!window.env || !window.env.SUPABASE_URL || !window.env.SUPABASE_ANON_KEY) {
-        console.error('Error: Supabase environment variables are not set. Cannot load admin panel.');
-        alert('Configuration error. Please check the console.');
+    if (!window.env || !window.env.SUPABASE_URL || !window.env.SUPABASE_ANON_KEY || 
+        window.env.SUPABASE_URL === 'https://your-project.supabase.co' || 
+        window.env.SUPABASE_ANON_KEY === 'your-anon-key-here') {
+        console.error('Error: Supabase environment variables are not properly configured. Cannot load admin panel.');
+        showConfigError();
         return;
     }
-    const { createClient } = window.supabase;
-    supabaseClient = createClient(window.env.SUPABASE_URL, window.env.SUPABASE_ANON_KEY);
     
-    // 2. LOAD DYNAMIC CONTENT
-    loadProjects();
-    loadBlogPosts();
+    try {
+        const { createClient } = window.supabase;
+        supabaseClient = createClient(window.env.SUPABASE_URL, window.env.SUPABASE_ANON_KEY);
+        
+        // 2. LOAD DYNAMIC CONTENT
+        loadProjects();
+        loadBlogPosts();
 
-    // 3. ATTACH FORM LISTENERS
-    const addProjectForm = document.getElementById('add-project-form');
-    addProjectForm.addEventListener('submit', handleAddProject);
+        // 3. ATTACH FORM LISTENERS
+        const addProjectForm = document.getElementById('add-project-form');
+        if (addProjectForm) {
+            addProjectForm.addEventListener('submit', handleAddProject);
+        }
 
-    const addBlogForm = document.getElementById('add-blog-form');
-    addBlogForm.addEventListener('submit', handleAddBlogPost);
+        const addBlogForm = document.getElementById('add-blog-form');
+        if (addBlogForm) {
+            addBlogForm.addEventListener('submit', handleAddBlogPost);
+        }
+    } catch (error) {
+        console.error('Error initializing Supabase client:', error);
+        showConfigError();
+    }
 });
+
+function showConfigError() {
+    const mainContent = document.querySelector('main');
+    if (mainContent) {
+        mainContent.innerHTML = `
+            <div class="col-span-1 lg:col-span-2">
+                <div class="border-2 border-red-500 p-8 bg-red-50 text-center">
+                    <h2 class="font-black text-3xl md:text-4xl mb-4 text-red-700">Configuration Error</h2>
+                    <p class="text-lg mb-4">The admin panel cannot function without proper Supabase configuration.</p>
+                    <p class="mb-4">Please update the <code class="bg-gray-200 px-2 py-1">js/config.js</code> file with your actual Supabase credentials:</p>
+                    <div class="bg-gray-100 p-4 text-left text-sm font-mono mb-4">
+                        <p>window.env = {</p>
+                        <p>&nbsp;&nbsp;SUPABASE_URL: 'https://your-actual-project.supabase.co',</p>
+                        <p>&nbsp;&nbsp;SUPABASE_ANON_KEY: 'your-actual-anon-key'</p>
+                        <p>};</p>
+                    </div>
+                    <p class="text-sm text-gray-600">After updating the config, refresh this page.</p>
+                </div>
+            </div>
+        `;
+    }
+}
 
 // --- PROJECT MANAGEMENT ---
 
