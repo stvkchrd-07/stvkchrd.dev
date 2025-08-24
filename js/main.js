@@ -72,10 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 2. CHECK CONFIG AND INITIALIZE SUPABASE CLIENT
-    if (!window.env || !window.env.SUPABASE_URL || !window.env.SUPABASE_ANON_KEY || 
-        window.env.SUPABASE_URL === 'https://your-project.supabase.co' || 
-        window.env.SUPABASE_ANON_KEY === 'your-anon-key-here') {
-        console.warn('Supabase environment variables are not properly configured. Using sample data.');
+    if (!window.env || !window.env.SUPABASE_URL || !window.env.SUPABASE_ANON_KEY) {
+        console.warn('Supabase credentials not found. Using sample data.');
         loadSampleProjects();
     } else {
         try {

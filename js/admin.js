@@ -10,10 +10,8 @@ let supabaseClient;
 // --- EVENT LISTENERS ---
 document.addEventListener('DOMContentLoaded', () => {
     // 1. CHECK CONFIG AND INITIALIZE SUPABASE CLIENT
-    if (!window.env || !window.env.SUPABASE_URL || !window.env.SUPABASE_ANON_KEY || 
-        window.env.SUPABASE_URL === 'https://your-project.supabase.co' || 
-        window.env.SUPABASE_ANON_KEY === 'your-anon-key-here') {
-        console.error('Error: Supabase environment variables are not properly configured. Cannot load admin panel.');
+    if (!window.env || !window.env.SUPABASE_URL || !window.env.SUPABASE_ANON_KEY) {
+        console.error('Error: Supabase credentials not found. Cannot load admin panel.');
         showConfigError();
         return;
     }
@@ -50,13 +48,14 @@ function showConfigError() {
                 <div class="border-2 border-red-500 p-8 bg-red-50 text-center">
                     <h2 class="font-black text-3xl md:text-4xl mb-4 text-red-700">Configuration Error</h2>
                     <p class="text-lg mb-4">The admin panel cannot function without proper Supabase configuration.</p>
-                    <p class="mb-4">Please update the <code class="bg-gray-200 px-2 py-1">js/config.js</code> file with your actual Supabase credentials:</p>
+                    <p class="mb-4">For local development, create <code class="bg-gray-200 px-2 py-1">js/config.local.js</code> with your credentials:</p>
                     <div class="bg-gray-100 p-4 text-left text-sm font-mono mb-4">
                         <p>window.env = {</p>
-                        <p>&nbsp;&nbsp;SUPABASE_URL: 'https://your-actual-project.supabase.co',</p>
+                        <p>&nbsp;&nbsp;SUPABASE_URL: 'https://your-project.supabase.co',</p>
                         <p>&nbsp;&nbsp;SUPABASE_ANON_KEY: 'your-actual-anon-key'</p>
                         <p>};</p>
                     </div>
+                    <p class="mb-4">For production (Netlify), set environment variables in the dashboard.</p>
                     <p class="text-sm text-gray-600">After updating the config, refresh this page.</p>
                 </div>
             </div>

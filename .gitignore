@@ -1,2 +1,5 @@
-# Supabase config file - contains secrets.
+# Supabase config files - contain secrets
 js/config.js
+js/config.local.js
+.env
+.env.local
