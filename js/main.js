@@ -28,6 +28,10 @@ function getParticleCssColor() {
     return getComputedStyle(document.body).getPropertyValue('--particle-color-value').trim();
 }
 
+function getAccentCssColor() {
+    return getComputedStyle(document.body).getPropertyValue('--accent-color').trim() || '#ff5a1f';
+}
+
 function animateParticleColorTo(targetCssColor, durationMs = 300) {
     if (!particlesMaterial || !targetCssColor) return;
     const targetColor = new THREE.Color(targetCssColor);
@@ -221,46 +225,73 @@ function initializeThreeJS() {
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.z = 10;
+
         const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        const particleCount = 2000; // Less dense
+
+        const particleCount = 2500;
         const positions = new Float32Array(particleCount * 3);
-        for (let i = 0; i < particleCount * 3; i++) { positions[i] = (Math.random() - 0.5) * 20; }
+
+        for (let i = 0; i < particleCount * 3; i++) {
+            positions[i] = (Math.random() - 0.5) * 24;
+        }
+
         const particlesGeometry = new THREE.BufferGeometry();
         particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        
-        // Use the global particlesMaterial variable
-        particlesMaterial = new THREE.PointsMaterial({ size: 0.02, sizeAttenuation: true });
+
+        particlesMaterial = new THREE.PointsMaterial({
+            size: 0.026,
+            sizeAttenuation: true,
+            transparent: true,
+            opacity: 0.82
+        });
+
         const initialColor = getParticleCssColor();
         if (initialColor) {
             particlesMaterial.color.set(initialColor);
         }
-        
+
         const particles = new THREE.Points(particlesGeometry, particlesMaterial);
         scene.add(particles);
+
         const mouse = new THREE.Vector2();
-        window.addEventListener('mousemove', (event) => { mouse.x = (event.clientX / window.innerWidth) * 2 - 1; mouse.y = -(event.clientY / window.innerHeight) * 2 + 1; }, { passive: true });
+        const pointerTarget = new THREE.Vector2();
+        window.addEventListener('mousemove', (event) => {
+            pointerTarget.x = (event.clientX / window.innerWidth) * 2 - 1;
+            pointerTarget.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        }, { passive: true });
+
         const clock = new THREE.Clock();
+        const blendColor = new THREE.Color();
+
         const animate = () => {
             const elapsedTime = clock.getElapsedTime();
-            particles.rotation.y = -0.04 * elapsedTime; // Slower
-            particles.rotation.x = -0.04 * elapsedTime; // Slower
-            if(mouse.x !== 0 && mouse.y !== 0){
-                const targetX = mouse.x * 0.2;
-                const targetY = mouse.y * 0.2;
-                particles.rotation.y += (targetX - particles.rotation.y) * 0.01; // Slower
-                particles.rotation.x += (targetY - particles.rotation.x) * 0.01; // Slower
-            }
+
+            mouse.lerp(pointerTarget, 0.06);
+            particles.rotation.y = -0.03 * elapsedTime + mouse.x * 0.12;
+            particles.rotation.x = -0.02 * elapsedTime + mouse.y * 0.08;
+
+            const breathe = (Math.sin(elapsedTime * 0.8) + 1) / 2;
+            particlesMaterial.size = 0.022 + breathe * 0.01;
+            particlesMaterial.opacity = 0.65 + breathe * 0.2;
+
+            const accentColor = new THREE.Color(getAccentCssColor());
+            const baseColor = new THREE.Color(getParticleCssColor());
+            blendColor.copy(baseColor).lerp(accentColor, 0.18 + breathe * 0.18);
+            particlesMaterial.color.set(blendColor);
+
             renderer.render(scene, camera);
             window.requestAnimationFrame(animate);
         };
+
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         }, { passive: true });
+
         animate();
     }
 }

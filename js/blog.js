@@ -1,7 +1,7 @@
 // js/blog.js
 
 // --- GLOBAL VARIABLES ---
-let supabaseClient;
+let blogSupabaseClient;
 
 // Sample blog posts for when Supabase is not configured
 const sampleBlogPosts = [
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         try {
             const { createClient } = window.supabase;
-            supabaseClient = createClient(window.env.SUPABASE_URL, window.env.SUPABASE_ANON_KEY);
+            blogSupabaseClient = createClient(window.env.SUPABASE_URL, window.env.SUPABASE_ANON_KEY);
             loadPublicBlogPosts();
         } catch (error) {
             console.error('Error initializing Supabase client:', error);
@@ -39,13 +39,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // --- DYNAMIC BLOG POST LOADING ---
 async function loadPublicBlogPosts() {
-    if (!supabaseClient) {
+    if (!blogSupabaseClient) {
         loadSampleBlogPosts();
         return;
     }
 
     try {
-        const { data: posts, error } = await supabaseClient.from('posts').select('*').order('date', { ascending: false });
+        const { data: posts, error } = await blogSupabaseClient.from('posts').select('*').order('date', { ascending: false });
         if (error) {
             console.warn('Error fetching posts:', error);
             loadSampleBlogPosts();

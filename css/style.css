@@ -2,6 +2,8 @@
 :root {
     --bg-color: #FFFFFF;
     --text-color: #000000;
+    --accent-color: #ff5a1f;
+    --accent-soft: #ffd9cc;
     --card-bg: rgba(255, 255, 255, 0.8);
     --loader-bg: #FFFFFF;
     --loader-text: #000000;
@@ -19,6 +21,8 @@
 body.dark {
     --bg-color: #111111;
     --text-color: #FFFFFF;
+    --accent-color: #ff8a5b;
+    --accent-soft: #3a2219;
     --card-bg: rgba(30, 30, 30, 0.8);
     --loader-bg: #111111;
     --loader-text: #FFFFFF;
@@ -56,6 +60,7 @@ body {
     -moz-osx-font-smoothing: grayscale; 
     overflow-x: hidden; 
     scroll-behavior: smooth;
+    background-image: radial-gradient(circle at 20% 10%, color-mix(in srgb, var(--accent-soft) 55%, transparent) 0%, transparent 35%);
 }
 
 /* Three.js Canvas Background */
@@ -70,11 +75,14 @@ body {
 
 /* Brutalist Hover Effect */
 .brutalist-hover { 
-    transition: none; 
+    transition: transform 200ms ease, background-color 200ms ease, color 200ms ease, box-shadow 200ms ease, border-color 200ms ease; 
 }
 .brutalist-hover:hover { 
     background-color: var(--brutalist-hover-bg); 
     color: var(--brutalist-hover-text); 
+    border-color: var(--accent-color);
+    box-shadow: 6px 6px 0 var(--accent-color);
+    transform: translate(-2px, -2px);
     cursor: pointer; 
 }
 
@@ -178,7 +186,7 @@ body {
     font-family: 'Inter', 'Arial Black', 'Arial', sans-serif;
     letter-spacing: 0.03em;
     text-transform: uppercase;
-    color: var(--lekh-text);
+    color: var(--accent-color);
     font-size: 1.25rem !important;      /* Decreased base size */
     font-weight: 900;
 }
@@ -250,4 +258,66 @@ footer, header {
 footer .mb-2, header .mt-2 {
     margin-bottom: 0.5rem !important;
     margin-top: 0.5rem !important;
+}
+
+.about-section {
+    position: relative;
+    overflow: hidden;
+}
+
+.about-section::before {
+    content: "";
+    position: absolute;
+    inset: -30% auto auto -5%;
+    width: 220px;
+    height: 220px;
+    background: var(--accent-soft);
+    border: 2px solid var(--text-color);
+    transform: rotate(15deg);
+    z-index: -1;
+}
+
+.about-photo-wrap {
+    border: 2px solid var(--text-color);
+    background: var(--accent-soft);
+    padding: 0.65rem;
+    box-shadow: 10px 10px 0 color-mix(in srgb, var(--accent-color) 60%, transparent);
+}
+
+.about-photo {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border: 2px solid var(--text-color);
+}
+
+.about-kicker {
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    color: var(--accent-color);
+}
+
+#blog-posts .space-y-8 > div {
+    position: relative;
+    background: linear-gradient(145deg, color-mix(in srgb, var(--card-bg) 88%, transparent), color-mix(in srgb, var(--accent-soft) 40%, transparent));
+    transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+}
+
+#blog-posts .space-y-8 > div:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-color);
+    box-shadow: 10px 10px 0 color-mix(in srgb, var(--accent-color) 55%, transparent);
+}
+
+#blog-posts .space-y-8 > div h2 {
+    color: var(--text-color);
+}
+
+#blog-posts .space-y-8 > div a {
+    color: var(--accent-color);
+}
+
+#blog-posts .post-summary p {
+    margin-bottom: 0.6rem;
+    line-height: 1.55;
 }
