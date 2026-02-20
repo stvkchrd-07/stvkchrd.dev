@@ -4,6 +4,10 @@
 let supabaseClient;
 let particlesMaterial; // Make particlesMaterial globally accessible
 let particleColorAnimationCounter = 0; // Used to cancel in-flight color animations
+let deviceTiltTarget = { x: 0, y: 0 };
+let deviceTiltCurrent = { x: 0, y: 0 };
+let gyroListenerAttached = false;
+
 
 // Sample projects for when Supabase is not configured
 const sampleProjects = [
@@ -30,6 +34,54 @@ function getParticleCssColor() {
 
 function getAccentCssColor() {
     return getComputedStyle(document.body).getPropertyValue('--accent-color').trim() || '#ff5a1f';
+}
+
+
+function shouldEnableGyroPrompt() {
+    return 'DeviceOrientationEvent' in window && typeof DeviceOrientationEvent.requestPermission === 'function';
+}
+
+function createGyroPromptButton() {
+    if (document.getElementById('gyro-permission-button')) return;
+    const button = document.createElement('button');
+    button.id = 'gyro-permission-button';
+    button.className = 'brutalist-hover';
+    button.type = 'button';
+    button.textContent = 'Enable motion effect';
+    document.body.appendChild(button);
+
+    button.addEventListener('click', async () => {
+        const granted = await requestGyroPermission();
+        if (granted) button.remove();
+    });
+}
+
+async function requestGyroPermission() {
+    if (!('DeviceOrientationEvent' in window)) return false;
+
+    try {
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+            const permissionState = await DeviceOrientationEvent.requestPermission();
+            if (permissionState !== 'granted') return false;
+        }
+
+        if (!gyroListenerAttached) {
+            window.addEventListener('deviceorientation', (event) => {
+            const gamma = Number.isFinite(event.gamma) ? event.gamma : 0;
+            const beta = Number.isFinite(event.beta) ? event.beta : 0;
+
+            // Normalize tilt values into a smooth -1..1 range
+            deviceTiltTarget.x = Math.max(-1, Math.min(1, gamma / 45));
+            deviceTiltTarget.y = Math.max(-1, Math.min(1, beta / 45));
+            }, { passive: true });
+            gyroListenerAttached = true;
+        }
+
+        return true;
+    } catch (error) {
+        console.warn('Gyroscope permission request failed:', error);
+        return false;
+    }
 }
 
 function animateParticleColorTo(targetCssColor, durationMs = 300) {
@@ -90,8 +142,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 3. INITIALIZE THREE.JS AND APPLY THEME
+    // 3. INITIALIZE THREE.JS, GYRO MOTION (IF AVAILABLE), AND APPLY THEME
     initializeThreeJS();
+    if (shouldEnableGyroPrompt()) {
+        createGyroPromptButton();
+    }
+
+    // Attempt to activate motion for platforms that grant access without explicit prompt.
+    requestGyroPermission().then((granted) => {
+        if (granted) {
+            const promptButton = document.getElementById('gyro-permission-button');
+            if (promptButton) promptButton.remove();
+        }
+    });
+
     const savedTheme = localStorage.getItem('theme') || 'light';
     applyTheme(savedTheme);
 });
@@ -269,8 +333,11 @@ function initializeThreeJS() {
             const elapsedTime = clock.getElapsedTime();
 
             mouse.lerp(pointerTarget, 0.06);
-            particles.rotation.y = -0.03 * elapsedTime + mouse.x * 0.12;
-            particles.rotation.x = -0.02 * elapsedTime + mouse.y * 0.08;
+            deviceTiltCurrent.x += (deviceTiltTarget.x - deviceTiltCurrent.x) * 0.05;
+            deviceTiltCurrent.y += (deviceTiltTarget.y - deviceTiltCurrent.y) * 0.05;
+
+            particles.rotation.y = -0.03 * elapsedTime + mouse.x * 0.12 + deviceTiltCurrent.x * 0.3;
+            particles.rotation.x = -0.02 * elapsedTime + mouse.y * 0.08 + deviceTiltCurrent.y * 0.22;
 
             const breathe = (Math.sin(elapsedTime * 0.8) + 1) / 2;
             particlesMaterial.size = 0.022 + breathe * 0.01;

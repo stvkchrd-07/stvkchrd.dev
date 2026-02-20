@@ -321,3 +321,19 @@ footer .mb-2, header .mt-2 {
     margin-bottom: 0.6rem;
     line-height: 1.55;
 }
+
+
+#gyro-permission-button {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 120;
+    border: 2px solid var(--text-color);
+    background: color-mix(in srgb, var(--accent-soft) 65%, var(--bg-color));
+    color: var(--text-color);
+    font-weight: 900;
+    font-size: 0.88rem;
+    letter-spacing: 0.03em;
+    padding: 0.65rem 0.85rem;
+    box-shadow: 6px 6px 0 color-mix(in srgb, var(--accent-color) 60%, transparent);
+}
