@@ -3,7 +3,8 @@
 
 window.env = {
     SUPABASE_URL: 'your-supabase-url-here',
-    SUPABASE_ANON_KEY: 'your-supabase-anon-key-here'
+    SUPABASE_ANON_KEY: 'your-supabase-anon-key-here',
+    RAO_BACKEND_URL: 'https://api.stvkchrd.dev/api/rao'
 };
 
 // For local development, copy this to config.local.js with real credentials

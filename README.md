@@ -143,3 +143,39 @@ stvkchrd.dev/
 ## License
 
 © 2025 Satvik Chaturvedi. All rights reserved.
+
+## Rao AI Voice Assistant Setup
+
+### Frontend
+1. Add `RAO_BACKEND_URL` to `js/config.js`:
+   ```javascript
+   window.env = {
+       SUPABASE_URL: 'https://your-project.supabase.co',
+       SUPABASE_ANON_KEY: 'your-anon-key',
+       RAO_BACKEND_URL: 'https://api.stvkchrd.dev/api/rao'
+   };
+   ```
+2. Open the site and click **Rao AI**. The browser captures microphone speech, sends only the transcript to the backend, and reads the response aloud.
+
+### Backend (Flask + Gemini)
+1. Create and activate a virtual environment:
+   ```bash
+   cd backend
+   python -m venv .venv
+   source .venv/bin/activate
+   pip install -r requirements.txt
+   ```
+2. Configure environment variables (never expose this in frontend):
+   ```bash
+   cp .env.example .env
+   # edit .env and set GEMINI_API_KEY
+   export $(grep -v '^#' .env | xargs)
+   ```
+3. Run the API:
+   ```bash
+   python app.py
+   ```
+4. Production notes:
+   - Keep `GEMINI_API_KEY` server-side only.
+   - Set `ALLOWED_ORIGIN` to your exact site domain (default: `https://stvkchrd.dev`).
+   - Expose `/api/rao` over HTTPS.
