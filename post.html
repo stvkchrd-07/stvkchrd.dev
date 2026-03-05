@@ -15,13 +15,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
 
     <!-- Config & Libraries -->
-    <script src="js/config.js" defer></script>
+    <!-- For local development (loads first) -->
+    <script src="js/config.local.js"></script>
+    <!-- For production (loads second, overrides if needed) -->
+    <script src="js/config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script> <!-- Markdown Parser -->
 
     <!-- Your Custom Stylesheet -->
-    <link rel="icon" type="image/png" href="logo2.png.png">
-    <link rel="stylesheet" href="css/style.min.css">
+    <link rel="icon" type="image/png" href="logo2.png">
+    <link rel="stylesheet" href="css/style.css">
     <style>
         /* Styles for rendered markdown content */
         .post-content h1, .post-content h2, .post-content h3 {
@@ -73,8 +76,8 @@
                 <a href="./index.html" class="font-black text-5xl sm:text-6xl md:text-7xl tracking-tighter hover:underline">Satvik Chaturvedi</a>
                 <nav class="mt-4 md:mt-0">
                     <ul class="flex space-x-2">
-                         <li><a href="https://x.com/StvkChrd" target="_blank" class="brutalist-hover block border-2 border-black p-3 font-bold" title="X (Twitter)">X</a></li>
-                        <li><a href="https://www.linkedin.com/in/stvkchrd" target="_blank" class="brutalist-hover block border-2 border-black p-3 font-bold" title="LinkedIn">in</a></li>
+                         <li><a href="https://x.com/StvkChrd" target="_blank" rel="noopener" class="brutalist-hover block border-2 border-black p-3 font-bold" title="X (Twitter)">X</a></li>
+                        <li><a href="https://www.linkedin.com/in/stvkchrd" target="_blank" rel="noopener" class="brutalist-hover block border-2 border-black p-3 font-bold" title="LinkedIn">in</a></li>
                         <li><a href="mailto:satvikc73@gmail.com" class="brutalist-hover block border-2 border-black p-3 font-bold" title="Mail">@</a></li>
                         <li><a href="./blog.html" class="brutalist-hover block border-2 border-black px-4 py-3 font-bold bg-black text-white">BLOG</a></li>
                         <li><button id="theme-toggle" class="brutalist-hover block border-2 border-black p-3 font-bold">MODE</button></li>
@@ -122,7 +125,8 @@
     <!-- Toast Notification for Email Copy -->
     <div id="copy-toast" class="toast">Email copied to clipboard!</div>
 
-    <script src="js/main.min.js" defer></script>
-    <script src="js/post.min.js" defer></script>
+    <script src="js/utils.js" defer></script>
+    <script src="js/main.js" defer></script>
+    <script src="js/post.js" defer></script>
 </body>
 </html>

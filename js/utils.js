@@ -1,29 +1,67 @@
-function copyEmailToClipboard(e) {
-    if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(e).then(() => {
-            showCopyToast(e)
-        }).catch(t => {
-            console.warn("Modern copy failed, falling back.", t), fallbackCopy(e)
-        })
-    } else {
-        fallbackCopy(e)
-    }
+// js/utils.js
+
+function escapeHtml(value) {
+    if (value === null || value === undefined) return '';
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
-function fallbackCopy(e) {
-    const o = document.createElement("textarea");
-    o.value = e, o.style.position = "fixed", document.body.appendChild(o), o.focus(), o.select();
+function formatDate(value, options) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+        return '';
+    }
+
+    return date.toLocaleDateString('en-US', options || {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+    });
+}
+
+function showCopyToast(text) {
+    const toast = document.getElementById('copy-toast');
+    if (!toast) return;
+
+    toast.textContent = `${text} copied to clipboard`;
+    toast.classList.add('show');
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 1000);
+}
+
+function fallbackCopy(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.opacity = '0';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
     try {
-        document.execCommand("copy"), showCopyToast(e)
-    } catch (e) {
-        console.error("Fallback: Oops, unable to copy", e)
+        document.execCommand('copy');
+        showCopyToast(text);
+    } catch (err) {
+        console.error('Unable to copy text:', err);
+    } finally {
+        document.body.removeChild(textArea);
     }
-    document.body.removeChild(o)
 }
 
-function showCopyToast(e) {
-    const o = document.getElementById("copy-toast");
-    o && (o.textContent = `${e} copied to clipboard`, o.classList.add("show"), setTimeout(() => {
-        o.classList.remove("show")
-    }, 800))
+function copyEmailToClipboard(email) {
+    if (!email) return;
+
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(email)
+            .then(() => showCopyToast(email))
+            .catch(() => fallbackCopy(email));
+        return;
+    }
+
+    fallbackCopy(email);
 }

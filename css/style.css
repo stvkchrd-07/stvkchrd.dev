@@ -54,8 +54,7 @@ body {
     color: var(--text-color); 
     -webkit-font-smoothing: antialiased; 
     -moz-osx-font-smoothing: grayscale; 
-    overflow-x: hidden; 
-    scroll-behavior: smooth;
+    overflow-x: hidden;
 }
 
 /* Three.js Canvas Background */
@@ -70,12 +69,17 @@ body {
 
 /* Brutalist Hover Effect */
 .brutalist-hover { 
-    transition: none; 
+    transition: background-color 180ms ease, color 180ms ease, transform 180ms ease; 
+}
+.brutalist-hover:focus-visible {
+    outline: 3px solid var(--text-color);
+    outline-offset: 2px;
 }
 .brutalist-hover:hover { 
     background-color: var(--brutalist-hover-bg); 
     color: var(--brutalist-hover-text); 
     cursor: pointer; 
+    transform: translateY(-1px);
 }
 
 /* Universal Sharp Corners */
