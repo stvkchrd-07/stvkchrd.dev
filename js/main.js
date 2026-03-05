@@ -5,6 +5,13 @@ let supabaseClient;
 let particlesMaterial; // Make particlesMaterial globally accessible
 let particleColorAnimationCounter = 0; // Used to cancel in-flight color animations
 
+function normalizeUrl(url) {
+    if (!url || typeof url !== 'string') return '';
+    const trimmed = url.trim();
+    if (!trimmed) return '';
+    return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+}
+
 // Sample projects for when Supabase is not configured
 const sampleProjects = [
     {
@@ -69,6 +76,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeToggleButton = document.getElementById('theme-toggle');
     if (themeToggleButton) {
         themeToggleButton.addEventListener('click', toggleTheme);
+    }
+
+    const raoAiLink = document.getElementById('rao-ai-link');
+    if (raoAiLink) {
+        const configuredRaoUrl = normalizeUrl(window.env?.RAO_BACKEND_URL);
+        if (configuredRaoUrl) {
+            raoAiLink.href = configuredRaoUrl;
+        }
     }
 
     // 2. CHECK CONFIG AND INITIALIZE SUPABASE CLIENT

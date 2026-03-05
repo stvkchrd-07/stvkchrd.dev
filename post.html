@@ -15,12 +15,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
 
     <!-- Config & Libraries -->
+    <script src="js/config.local.js"></script>
     <script src="js/config.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script> <!-- Markdown Parser -->
 
     <!-- Your Custom Stylesheet -->
-    <link rel="icon" type="image/png" href="logo2.png.png">
+    <link rel="icon" type="image/png" href="logo2.png">
     <link rel="stylesheet" href="css/style.min.css">
     <style>
         /* Styles for rendered markdown content */
@@ -73,10 +74,11 @@
                 <a href="./index.html" class="font-black text-5xl sm:text-6xl md:text-7xl tracking-tighter hover:underline">Satvik Chaturvedi</a>
                 <nav class="mt-4 md:mt-0">
                     <ul class="flex space-x-2">
-                         <li><a href="https://x.com/StvkChrd" target="_blank" class="brutalist-hover block border-2 border-black p-3 font-bold" title="X (Twitter)">X</a></li>
-                        <li><a href="https://www.linkedin.com/in/stvkchrd" target="_blank" class="brutalist-hover block border-2 border-black p-3 font-bold" title="LinkedIn">in</a></li>
+                         <li><a href="https://x.com/StvkChrd" target="_blank" rel="noopener" class="brutalist-hover block border-2 border-black p-3 font-bold" title="X (Twitter)">X</a></li>
+                        <li><a href="https://www.linkedin.com/in/stvkchrd" target="_blank" rel="noopener" class="brutalist-hover block border-2 border-black p-3 font-bold" title="LinkedIn">in</a></li>
                         <li><a href="mailto:satvikc73@gmail.com" class="brutalist-hover block border-2 border-black p-3 font-bold" title="Mail">@</a></li>
                         <li><a href="./blog.html" class="brutalist-hover block border-2 border-black px-4 py-3 font-bold bg-black text-white">BLOG</a></li>
+                        <li><a id="rao-ai-link" href="https://stvkchrddev-production.up.railway.app" target="_blank" rel="noopener" class="brutalist-hover block border-2 border-black px-4 py-3 font-bold" title="RAO AI">RAO AI</a></li>
                         <li><button id="theme-toggle" class="brutalist-hover block border-2 border-black p-3 font-bold">MODE</button></li>
                     </ul>
                 </nav>
