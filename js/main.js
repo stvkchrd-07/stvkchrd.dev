@@ -4,6 +4,10 @@
 let supabaseClient;
 let particlesMaterial; // Make particlesMaterial globally accessible
 let particleColorAnimationCounter = 0; // Used to cancel in-flight color animations
+let deviceTiltTarget = { x: 0, y: 0 };
+let deviceTiltCurrent = { x: 0, y: 0 };
+let gyroListenerAttached = false;
+
 
 // Sample projects for when Supabase is not configured
 const sampleProjects = [
@@ -26,6 +30,58 @@ const sampleProjects = [
 function getParticleCssColor() {
     // Read from body so body.dark overrides take effect
     return getComputedStyle(document.body).getPropertyValue('--particle-color-value').trim();
+}
+
+function getAccentCssColor() {
+    return getComputedStyle(document.body).getPropertyValue('--accent-color').trim() || '#ff5a1f';
+}
+
+
+function shouldEnableGyroPrompt() {
+    return 'DeviceOrientationEvent' in window && typeof DeviceOrientationEvent.requestPermission === 'function';
+}
+
+function createGyroPromptButton() {
+    if (document.getElementById('gyro-permission-button')) return;
+    const button = document.createElement('button');
+    button.id = 'gyro-permission-button';
+    button.className = 'brutalist-hover';
+    button.type = 'button';
+    button.textContent = 'Enable motion effect';
+    document.body.appendChild(button);
+
+    button.addEventListener('click', async () => {
+        const granted = await requestGyroPermission();
+        if (granted) button.remove();
+    });
+}
+
+async function requestGyroPermission() {
+    if (!('DeviceOrientationEvent' in window)) return false;
+
+    try {
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+            const permissionState = await DeviceOrientationEvent.requestPermission();
+            if (permissionState !== 'granted') return false;
+        }
+
+        if (!gyroListenerAttached) {
+            window.addEventListener('deviceorientation', (event) => {
+            const gamma = Number.isFinite(event.gamma) ? event.gamma : 0;
+            const beta = Number.isFinite(event.beta) ? event.beta : 0;
+
+            // Normalize tilt values into a smooth -1..1 range
+            deviceTiltTarget.x = Math.max(-1, Math.min(1, gamma / 45));
+            deviceTiltTarget.y = Math.max(-1, Math.min(1, beta / 45));
+            }, { passive: true });
+            gyroListenerAttached = true;
+        }
+
+        return true;
+    } catch (error) {
+        console.warn('Gyroscope permission request failed:', error);
+        return false;
+    }
 }
 
 function animateParticleColorTo(targetCssColor, durationMs = 300) {
@@ -86,8 +142,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 3. INITIALIZE THREE.JS AND APPLY THEME
+    // 3. INITIALIZE THREE.JS, GYRO MOTION (IF AVAILABLE), AND APPLY THEME
     initializeThreeJS();
+    if (shouldEnableGyroPrompt()) {
+        createGyroPromptButton();
+    }
+
+    // Attempt to activate motion for platforms that grant access without explicit prompt.
+    requestGyroPermission().then((granted) => {
+        if (granted) {
+            const promptButton = document.getElementById('gyro-permission-button');
+            if (promptButton) promptButton.remove();
+        }
+    });
+
     const savedTheme = localStorage.getItem('theme') || 'light';
     applyTheme(savedTheme);
 });
@@ -221,46 +289,76 @@ function initializeThreeJS() {
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.z = 10;
+
         const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        const particleCount = 2000; // Less dense
+
+        const particleCount = 2500;
         const positions = new Float32Array(particleCount * 3);
-        for (let i = 0; i < particleCount * 3; i++) { positions[i] = (Math.random() - 0.5) * 20; }
+
+        for (let i = 0; i < particleCount * 3; i++) {
+            positions[i] = (Math.random() - 0.5) * 24;
+        }
+
         const particlesGeometry = new THREE.BufferGeometry();
         particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        
-        // Use the global particlesMaterial variable
-        particlesMaterial = new THREE.PointsMaterial({ size: 0.02, sizeAttenuation: true });
+
+        particlesMaterial = new THREE.PointsMaterial({
+            size: 0.026,
+            sizeAttenuation: true,
+            transparent: true,
+            opacity: 0.82
+        });
+
         const initialColor = getParticleCssColor();
         if (initialColor) {
             particlesMaterial.color.set(initialColor);
         }
-        
+
         const particles = new THREE.Points(particlesGeometry, particlesMaterial);
         scene.add(particles);
+
         const mouse = new THREE.Vector2();
-        window.addEventListener('mousemove', (event) => { mouse.x = (event.clientX / window.innerWidth) * 2 - 1; mouse.y = -(event.clientY / window.innerHeight) * 2 + 1; }, { passive: true });
+        const pointerTarget = new THREE.Vector2();
+        window.addEventListener('mousemove', (event) => {
+            pointerTarget.x = (event.clientX / window.innerWidth) * 2 - 1;
+            pointerTarget.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        }, { passive: true });
+
         const clock = new THREE.Clock();
+        const blendColor = new THREE.Color();
+
         const animate = () => {
             const elapsedTime = clock.getElapsedTime();
-            particles.rotation.y = -0.04 * elapsedTime; // Slower
-            particles.rotation.x = -0.04 * elapsedTime; // Slower
-            if(mouse.x !== 0 && mouse.y !== 0){
-                const targetX = mouse.x * 0.2;
-                const targetY = mouse.y * 0.2;
-                particles.rotation.y += (targetX - particles.rotation.y) * 0.01; // Slower
-                particles.rotation.x += (targetY - particles.rotation.x) * 0.01; // Slower
-            }
+
+            mouse.lerp(pointerTarget, 0.06);
+            deviceTiltCurrent.x += (deviceTiltTarget.x - deviceTiltCurrent.x) * 0.05;
+            deviceTiltCurrent.y += (deviceTiltTarget.y - deviceTiltCurrent.y) * 0.05;
+
+            particles.rotation.y = -0.03 * elapsedTime + mouse.x * 0.12 + deviceTiltCurrent.x * 0.3;
+            particles.rotation.x = -0.02 * elapsedTime + mouse.y * 0.08 + deviceTiltCurrent.y * 0.22;
+
+            const breathe = (Math.sin(elapsedTime * 0.8) + 1) / 2;
+            particlesMaterial.size = 0.022 + breathe * 0.01;
+            particlesMaterial.opacity = 0.65 + breathe * 0.2;
+
+            const accentColor = new THREE.Color(getAccentCssColor());
+            const baseColor = new THREE.Color(getParticleCssColor());
+            blendColor.copy(baseColor).lerp(accentColor, 0.18 + breathe * 0.18);
+            particlesMaterial.color.set(blendColor);
+
             renderer.render(scene, camera);
             window.requestAnimationFrame(animate);
         };
+
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         }, { passive: true });
+
         animate();
     }
 }
