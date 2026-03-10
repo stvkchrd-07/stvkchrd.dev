@@ -78,13 +78,6 @@ document.addEventListener('DOMContentLoaded', () => {
         themeToggleButton.addEventListener('click', toggleTheme);
     }
 
-    const raoAiLink = document.getElementById('rao-ai-link');
-    if (raoAiLink) {
-        const configuredRaoUrl = normalizeUrl(window.env?.RAO_BACKEND_URL);
-        if (configuredRaoUrl) {
-            raoAiLink.href = configuredRaoUrl;
-        }
-    }
 
     // 2. CHECK CONFIG AND INITIALIZE SUPABASE CLIENT
     if (!window.env || !window.env.SUPABASE_URL || !window.env.SUPABASE_ANON_KEY) {
@@ -207,27 +200,7 @@ window.onclick = function(event) {
     }
 }
 
-// --- EMAIL COPY SCRIPT ---
-function copyEmailToClipboard(email) {
-    const textArea = document.createElement('textarea');
-    textArea.value = email;
-    textArea.style.position = 'fixed';
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-    try {
-        document.execCommand('copy');
-        const toast = document.getElementById('copy-toast');
-        if (toast) {
-            toast.textContent = `${email} copied to clipboard`;
-            toast.classList.add('show');
-            setTimeout(() => { toast.classList.remove('show'); }, 800);
-        }
-    } catch (err) {
-        console.error('Fallback: Oops, unable to copy', err);
-    }
-    document.body.removeChild(textArea);
-}
+// copyEmailToClipboard is in utils.js
 
 // --- THREE.JS BACKGROUND SCRIPT ---
 function initializeThreeJS() {
