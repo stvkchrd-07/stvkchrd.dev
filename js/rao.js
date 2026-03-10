@@ -54,6 +54,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+function setupSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    raoRecognition = new SpeechRecognition();
+    raoRecognition.continuous = false;
+    raoRecognition.interimResults = false;
+    raoRecognition.lang = 'en-IN';
+
+    raoRecognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        appendMessage(transcript, 'user');
+        setMicState('thinking');
+        sendToGroq(transcript);
+    };
+
+    raoRecognition.onend = () => {
+        if (raoListening) setMicState('idle');
+        raoListening = false;
+    };
+
+    raoRecognition.onerror = (e) => {
+        console.error('Speech recognition error:', e.error);
+        setMicState('idle');
+        raoListening = false;
+    };
+}
+
 function toggleMic() {
     if (raoListening) {
         stopListening();

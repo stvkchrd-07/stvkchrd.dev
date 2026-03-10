@@ -407,3 +407,53 @@ body.dark .rao-mic-listening {
     text-transform: uppercase;
     opacity: 0.6;
 }
+
+/* ===== MOBILE FIXES ===== */
+@media (max-width: 640px) {
+    /* Nav wraps cleanly on small screens */
+    header nav ul {
+        flex-wrap: wrap;
+        gap: 0.4rem;
+    }
+    header nav ul li a,
+    header nav ul li button {
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.8rem;
+    }
+
+    /* RAO modal full screen on mobile */
+    #rao-modal {
+        padding: 0;
+        align-items: flex-end;
+        justify-content: center;
+    }
+    .rao-modal-content {
+        max-width: 100%;
+        width: 100%;
+        height: 80vh;
+        border-bottom: none;
+    }
+
+    /* Project modal full width */
+    .modal-content {
+        width: 95%;
+        margin: 5% auto;
+        padding: 1.25rem;
+    }
+
+    /* Bigger mic button on mobile for easy tapping */
+    .rao-mic-btn {
+        width: 80px;
+        height: 80px;
+    }
+
+    /* Content padding tighter on mobile */
+    body {
+        padding: 0.75rem !important;
+    }
+
+    /* Footer text size */
+    footer p {
+        font-size: 0.85rem;
+    }
+}

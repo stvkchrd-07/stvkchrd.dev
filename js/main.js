@@ -227,18 +227,55 @@ function initializeThreeJS() {
         
         const particles = new THREE.Points(particlesGeometry, particlesMaterial);
         scene.add(particles);
-        const mouse = new THREE.Vector2();
-        window.addEventListener('mousemove', (event) => { mouse.x = (event.clientX / window.innerWidth) * 2 - 1; mouse.y = -(event.clientY / window.innerHeight) * 2 + 1; }, { passive: true });
+        const pointer = { x: 0, y: 0 };
+
+        // Mouse on desktop
+        window.addEventListener('mousemove', (event) => {
+            pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+            pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        }, { passive: true });
+
+        // Gyroscope on mobile
+        function enableGyro() {
+            window.addEventListener('deviceorientation', (event) => {
+                if (event.gamma !== null && event.beta !== null) {
+                    pointer.x = (event.gamma / 45) * 0.6;
+                    pointer.y = ((event.beta - 45) / 45) * 0.6;
+                }
+            }, { passive: true });
+        }
+
+        function requestGyro() {
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission().then(state => {
+                    if (state === 'granted') enableGyro();
+                }).catch(() => {});
+            } else if (window.DeviceOrientationEvent) {
+                enableGyro();
+            }
+        }
+
+        // iOS needs user gesture; Android fires immediately
+        window.addEventListener('touchstart', function initGyroOnTouch() {
+            requestGyro();
+        }, { once: true, passive: true });
+
+        if (!/Mobi|Android/i.test(navigator.userAgent)) {
+            // desktop: mousemove handles it
+        } else {
+            requestGyro();
+        }
+
         const clock = new THREE.Clock();
         const animate = () => {
             const elapsedTime = clock.getElapsedTime();
-            particles.rotation.y = -0.04 * elapsedTime; // Slower
-            particles.rotation.x = -0.04 * elapsedTime; // Slower
-            if(mouse.x !== 0 && mouse.y !== 0){
-                const targetX = mouse.x * 0.2;
-                const targetY = mouse.y * 0.2;
-                particles.rotation.y += (targetX - particles.rotation.y) * 0.01; // Slower
-                particles.rotation.x += (targetY - particles.rotation.x) * 0.01; // Slower
+            particles.rotation.y = -0.04 * elapsedTime;
+            particles.rotation.x = -0.04 * elapsedTime;
+            if (pointer.x !== 0 || pointer.y !== 0) {
+                const targetX = pointer.x * 0.2;
+                const targetY = pointer.y * 0.2;
+                particles.rotation.y += (targetX - particles.rotation.y) * 0.01;
+                particles.rotation.x += (targetY - particles.rotation.x) * 0.01;
             }
             renderer.render(scene, camera);
             window.requestAnimationFrame(animate);
