@@ -1,8 +1,9 @@
-// js/rao.js — RAO AI | Groq LLM + ElevenLabs TTS + Web Speech Recognition
+// js/rao.js — RAO AI | Groq + ElevenLabs + Web Speech
 
 let raoListening = false;
 let raoRecognition = null;
 let raoConversationHistory = [];
+let micPermissionGranted = false;
 
 function openRao() {
     document.getElementById('rao-modal').style.display = 'flex';
@@ -18,40 +19,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) closeRao(); });
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-        raoRecognition = new SpeechRecognition();
-        raoRecognition.continuous = false;
-        raoRecognition.interimResults = false;
-        raoRecognition.lang = 'en-IN';
-
-        raoRecognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            appendMessage(transcript, 'user');
-            setMicState('thinking');
-            sendToGroq(transcript);
-        };
-
-        raoRecognition.onend = () => {
-            if (raoListening) setMicState('idle');
-            raoListening = false;
-        };
-
-        raoRecognition.onerror = (e) => {
-            console.error('Speech recognition error:', e.error);
-            setMicState('idle');
-            raoListening = false;
-            if (e.error === 'not-allowed') {
-                const msg = 'mic access nahi mila bhai. browser mein allow karo. rao ki jai ho';
-                appendMessage(msg + ' 🙏', 'ai');
-                speakElevenLabs(msg);
-            }
-        };
-    } else {
+    if (!SpeechRecognition) {
+        // No speech support — show text fallback
         const micBtn = document.getElementById('rao-mic-btn');
         if (micBtn) micBtn.style.display = 'none';
         const fallback = document.getElementById('rao-fallback');
         if (fallback) fallback.style.display = 'flex';
+        return;
     }
+
+    setupSpeechRecognition();
 });
 
 function setupSpeechRecognition() {
@@ -69,23 +46,42 @@ function setupSpeechRecognition() {
     };
 
     raoRecognition.onend = () => {
-        if (raoListening) setMicState('idle');
         raoListening = false;
+        // Only reset to idle if not already in thinking state
+        const btn = document.getElementById('rao-mic-btn');
+        if (btn && btn.classList.contains('rao-mic-listening')) {
+            setMicState('idle');
+        }
     };
 
     raoRecognition.onerror = (e) => {
-        console.error('Speech recognition error:', e.error);
-        setMicState('idle');
+        console.error('Speech error:', e.error);
         raoListening = false;
+        setMicState('idle');
     };
 }
 
-function toggleMic() {
+async function toggleMic() {
     if (raoListening) {
         stopListening();
-    } else {
-        startListening();
+        return;
     }
+
+    // Ask for mic permission once, then start listening
+    if (!micPermissionGranted) {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            stream.getTracks().forEach(t => t.stop()); // release stream, we just needed the grant
+            micPermissionGranted = true;
+            // Re-init recognition after permission granted (fixes the mobile stop bug)
+            setupSpeechRecognition();
+        } catch (err) {
+            appendMessage('mic permission nahi mila. browser settings mein allow karo. rao ki jai ho 🙏', 'ai');
+            return;
+        }
+    }
+
+    startListening();
 }
 
 function startListening() {
@@ -94,7 +90,15 @@ function startListening() {
         raoRecognition.start();
         raoListening = true;
         setMicState('listening');
-    } catch (e) { console.error(e); }
+    } catch (e) {
+        console.error('Recognition start error:', e);
+        // If already started, stop and retry once
+        raoRecognition.stop();
+        setTimeout(() => {
+            try { raoRecognition.start(); raoListening = true; setMicState('listening'); }
+            catch(e2) { console.error(e2); }
+        }, 300);
+    }
 }
 
 function stopListening() {
@@ -161,13 +165,12 @@ async function sendToGroq(userText) {
             const fallback = 'kuch toh gadbad hai. rao ki jai ho';
             appendMessage(fallback + ' 🙏', 'ai');
             await speakElevenLabs(fallback, elevenKey);
-            console.error('Groq error:', data);
         }
     } catch (err) {
         const errMsg = 'network issue lag raha hai bhai. rao ki jai ho';
         appendMessage(errMsg + ' 🙏', 'ai');
         await speakElevenLabs(errMsg, elevenKey);
-        console.error('Groq fetch error:', err);
+        console.error('Groq error:', err);
     }
 
     setMicState('idle');
@@ -175,14 +178,11 @@ async function sendToGroq(userText) {
 
 async function speakElevenLabs(text, apiKey) {
     if (!apiKey || apiKey === 'YOUR_ELEVENLABS_API_KEY_HERE') {
-        // Fallback to browser TTS if no ElevenLabs key
         browserSpeak(text);
         return;
     }
-
     try {
         const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/pNInz6obpgDQGcFmaJgB', {
-            // Using "Adam" voice — natural, clear, free tier friendly
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -190,28 +190,21 @@ async function speakElevenLabs(text, apiKey) {
             },
             body: JSON.stringify({
                 text: text,
-                model_id: 'eleven_turbo_v2_5', // fastest + cheapest on free tier
+                model_id: 'eleven_turbo_v2_5',
                 voice_settings: {
                     stability: 0.5,
                     similarity_boost: 0.75,
-                    speed: 1.05
+                    speed: 0.88
                 }
             })
         });
-
-        if (!response.ok) {
-            console.warn('ElevenLabs failed, falling back to browser TTS');
-            browserSpeak(text);
-            return;
-        }
-
+        if (!response.ok) { browserSpeak(text); return; }
         const audioBlob = await response.blob();
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
         audio.play();
         audio.onended = () => URL.revokeObjectURL(audioUrl);
     } catch (err) {
-        console.warn('ElevenLabs error, falling back:', err);
         browserSpeak(text);
     }
 }
@@ -221,7 +214,7 @@ function browserSpeak(text) {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-IN';
-    utterance.rate = 1.0;
+    utterance.rate = 0.9;
     const voices = window.speechSynthesis.getVoices();
     const preferred = voices.find(v => v.lang === 'en-IN') || voices.find(v => v.lang.startsWith('en'));
     if (preferred) utterance.voice = preferred;

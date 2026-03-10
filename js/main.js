@@ -255,15 +255,29 @@ function initializeThreeJS() {
             }
         }
 
-        // iOS needs user gesture; Android fires immediately
-        window.addEventListener('touchstart', function initGyroOnTouch() {
-            requestGyro();
-        }, { once: true, passive: true });
+        // Android: enable immediately
+        // iOS: show a one-time button to request permission
+        const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+        const isIOS = /iPhone|iPad/i.test(navigator.userAgent);
 
-        if (!/Mobi|Android/i.test(navigator.userAgent)) {
-            // desktop: mousemove handles it
-        } else {
-            requestGyro();
+        if (isMobile) {
+            if (isIOS && typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                // Show gyro permission button
+                const gyroBtn = document.createElement('button');
+                gyroBtn.id = 'gyro-permission-btn';
+                gyroBtn.textContent = '🔄 Enable Motion';
+                gyroBtn.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:999;padding:10px 20px;font-family:Inter,sans-serif;font-weight:900;font-size:0.85rem;border:2px solid #000;background:#fff;cursor:pointer;letter-spacing:0.05em;';
+                document.body.appendChild(gyroBtn);
+                gyroBtn.addEventListener('click', () => {
+                    DeviceOrientationEvent.requestPermission().then(state => {
+                        if (state === 'granted') enableGyro();
+                    }).catch(() => {});
+                    gyroBtn.remove();
+                });
+            } else {
+                // Android — no permission needed
+                enableGyro();
+            }
         }
 
         const clock = new THREE.Clock();
