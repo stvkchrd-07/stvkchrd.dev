@@ -227,70 +227,74 @@ function initializeThreeJS() {
         
         const particles = new THREE.Points(particlesGeometry, particlesMaterial);
         scene.add(particles);
-        const pointer = { x: 0, y: 0 };
+        // Target rotation driven by mouse or gyro
+        const target = { x: 0, y: 0 };
+        let gyroActive = false;
 
-        // Mouse on desktop
+        // --- DESKTOP: mouse moves particles ---
         window.addEventListener('mousemove', (event) => {
-            pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-            pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            if (gyroActive) return; // gyro takes priority on mobile
+            target.x = ((event.clientY / window.innerHeight) - 0.5) * 1.2;
+            target.y = ((event.clientX / window.innerWidth) - 0.5) * 1.2;
         }, { passive: true });
 
-        // Gyroscope on mobile
+        // --- MOBILE GYROSCOPE ---
         function enableGyro() {
+            gyroActive = true;
+            let baseAlpha = null; // calibrate on first reading
+
             window.addEventListener('deviceorientation', (event) => {
-                if (event.gamma !== null && event.beta !== null) {
-                    pointer.x = (event.gamma / 45) * 0.6;
-                    pointer.y = ((event.beta - 45) / 45) * 0.6;
-                }
+                // beta  = front-back tilt (-180 to 180), controls X rotation
+                // gamma = left-right tilt (-90 to 90),  controls Y rotation
+                const beta  = event.beta  !== null ? event.beta  : 0;
+                const gamma = event.gamma !== null ? event.gamma : 0;
+
+                // Normalise: phone held upright (beta~90) = neutral
+                target.x = THREE.MathUtils.clamp((beta - 90) / 60, -1, 1) * 1.5;
+                target.y = THREE.MathUtils.clamp(gamma / 45, -1, 1) * 1.5;
             }, { passive: true });
         }
 
-        function requestGyro() {
-            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                DeviceOrientationEvent.requestPermission().then(state => {
-                    if (state === 'granted') enableGyro();
-                }).catch(() => {});
-            } else if (window.DeviceOrientationEvent) {
-                enableGyro();
-            }
-        }
-
-        // Android: enable immediately
-        // iOS: show a one-time button to request permission
         const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-        const isIOS = /iPhone|iPad/i.test(navigator.userAgent);
+        const isIOS    = /iPhone|iPad/i.test(navigator.userAgent);
 
         if (isMobile) {
-            if (isIOS && typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                // Show gyro permission button
+            if (isIOS && typeof DeviceOrientationEvent !== 'undefined'
+                      && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                // Show a clean one-time button — auto-removed after tap
                 const gyroBtn = document.createElement('button');
                 gyroBtn.id = 'gyro-permission-btn';
                 gyroBtn.textContent = '🔄 Enable Motion';
-                gyroBtn.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:999;padding:10px 20px;font-family:Inter,sans-serif;font-weight:900;font-size:0.85rem;border:2px solid #000;background:#fff;cursor:pointer;letter-spacing:0.05em;';
+                gyroBtn.style.cssText = [
+                    'position:fixed', 'bottom:24px', 'left:50%',
+                    'transform:translateX(-50%)', 'z-index:999',
+                    'padding:12px 24px', 'font-family:Inter,sans-serif',
+                    'font-weight:900', 'font-size:0.85rem', 'letter-spacing:0.06em',
+                    'border:2px solid #000', 'background:#fff', 'color:#000',
+                    'cursor:pointer', 'box-shadow:3px 3px 0 #000'
+                ].join(';');
                 document.body.appendChild(gyroBtn);
+
                 gyroBtn.addEventListener('click', () => {
-                    DeviceOrientationEvent.requestPermission().then(state => {
-                        if (state === 'granted') enableGyro();
-                    }).catch(() => {});
-                    gyroBtn.remove();
+                    DeviceOrientationEvent.requestPermission()
+                        .then(state => { if (state === 'granted') enableGyro(); })
+                        .catch(() => {});
+                    gyroBtn.style.opacity = '0';
+                    gyroBtn.style.transition = 'opacity 0.3s';
+                    setTimeout(() => gyroBtn.remove(), 350);
                 });
             } else {
-                // Android — no permission needed
+                // Android — fires without permission
                 enableGyro();
             }
         }
 
         const clock = new THREE.Clock();
         const animate = () => {
-            const elapsedTime = clock.getElapsedTime();
-            particles.rotation.y = -0.04 * elapsedTime;
-            particles.rotation.x = -0.04 * elapsedTime;
-            if (pointer.x !== 0 || pointer.y !== 0) {
-                const targetX = pointer.x * 0.2;
-                const targetY = pointer.y * 0.2;
-                particles.rotation.y += (targetX - particles.rotation.y) * 0.01;
-                particles.rotation.x += (targetY - particles.rotation.x) * 0.01;
-            }
+            clock.getDelta(); // keep clock ticking but don't use elapsed for rotation
+            // Smooth lerp towards target — feels like the scene is floating
+            particles.rotation.x += (target.x - particles.rotation.x) * 0.05;
+            particles.rotation.y += (target.y - particles.rotation.y) * 0.05;
             renderer.render(scene, camera);
             window.requestAnimationFrame(animate);
         };
