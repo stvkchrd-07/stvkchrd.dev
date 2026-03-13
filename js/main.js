@@ -57,6 +57,9 @@ function animateParticleColorTo(targetCssColor, durationMs = 300) {
 // --- THEME TOGGLE FUNCTIONS ---
 function applyTheme(theme) {
     document.body.classList.toggle('dark', theme === 'dark');
+    // Update icon: show sun when dark (click to go light), moon when light (click to go dark)
+    const icon = document.getElementById('theme-icon');
+    if (icon) icon.textContent = theme === 'dark' ? '☀️' : '🌙';
     if (particlesMaterial) {
         const particleColor = getParticleCssColor();
         animateParticleColorTo(particleColor, 350);
@@ -96,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3. INITIALIZE THREE.JS AND APPLY THEME
     initializeThreeJS();
-    const savedTheme = localStorage.getItem('theme') || 'light';
+    const savedTheme = localStorage.getItem('theme') || 'dark';
     applyTheme(savedTheme);
 });
 
@@ -307,3 +310,106 @@ function initializeThreeJS() {
         animate();
     }
 }
+
+// --- CURRENTLY WORKING ON SLIDER ---
+const sampleWorkingOn = [
+    {
+        title: "TheCommonCo",
+        tag: "Streetwear / Merch",
+        description: "Scaling bulk corporate merch orders. Working on overseas pricing models and influencer outreach campaigns.",
+        status: "Active"
+    },
+    {
+        title: "Sirenn",
+        tag: "Luxury Streetwear",
+        description: "Building the brand identity and early product line for a future luxury streetwear label.",
+        status: "Building"
+    },
+    {
+        title: "SurFlow Events",
+        tag: "Event Management",
+        description: "Connecting underrated artists with cafés, restaurants, and corporate venues for curated weekend experiences.",
+        status: "Active"
+    }
+];
+
+let cwoIndex = 0;
+
+function initCWO(items) {
+    const slider = document.getElementById('cwo-slider');
+    const dotsContainer = document.getElementById('cwo-dots');
+    if (!slider || !dotsContainer) return;
+
+    slider.innerHTML = '';
+    dotsContainer.innerHTML = '';
+
+    items.forEach((item, i) => {
+        const card = document.createElement('div');
+        card.className = 'cwo-card';
+        card.innerHTML = `
+            <div class="cwo-card-tag">${item.tag || ''}</div>
+            <h3 class="font-black text-2xl md:text-3xl mb-2">${item.title}</h3>
+            <p class="cwo-card-desc">${item.description}</p>
+            <span class="cwo-status">${item.status || 'In Progress'}</span>
+        `;
+        slider.appendChild(card);
+
+        const dot = document.createElement('button');
+        dot.className = 'cwo-dot' + (i === 0 ? ' cwo-dot-active' : '');
+        dot.setAttribute('aria-label', `Go to card ${i + 1}`);
+        dot.addEventListener('click', () => goToCWO(i));
+        dotsContainer.appendChild(dot);
+    });
+
+    goToCWO(0);
+
+    // Auto-advance every 4s
+    setInterval(() => {
+        cwoIndex = (cwoIndex + 1) % items.length;
+        goToCWO(cwoIndex);
+    }, 4000);
+
+    // Touch swipe support
+    let touchStartX = 0;
+    slider.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+    slider.addEventListener('touchend', e => {
+        const diff = touchStartX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 40) {
+            cwoIndex = diff > 0
+                ? Math.min(cwoIndex + 1, items.length - 1)
+                : Math.max(cwoIndex - 1, 0);
+            goToCWO(cwoIndex);
+        }
+    }, { passive: true });
+}
+
+function goToCWO(index) {
+    cwoIndex = index;
+    const slider = document.getElementById('cwo-slider');
+    if (slider) slider.style.transform = `translateX(-${index * 100}%)`;
+    document.querySelectorAll('.cwo-dot').forEach((dot, i) => {
+        dot.classList.toggle('cwo-dot-active', i === index);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Load CWO from Supabase if available, else use sample
+    if (window.supabase && window.env && window.env.SUPABASE_URL) {
+        try {
+            const { createClient } = window.supabase;
+            const client = createClient(window.env.SUPABASE_URL, window.env.SUPABASE_ANON_KEY);
+            client.from('working_on').select('*').order('id', { ascending: false })
+                .then(({ data, error }) => {
+                    if (error || !data || data.length === 0) {
+                        initCWO(sampleWorkingOn);
+                    } else {
+                        initCWO(data);
+                    }
+                });
+        } catch(e) {
+            initCWO(sampleWorkingOn);
+        }
+    } else {
+        initCWO(sampleWorkingOn);
+    }
+});

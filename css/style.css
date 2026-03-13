@@ -457,3 +457,96 @@ body.dark .rao-mic-listening {
         font-size: 0.85rem;
     }
 }
+
+/* ===== DARK MODE PROJECT CARD FIX ===== */
+body.dark .brutalist-hover {
+    background-color: rgba(30, 30, 30, 0.85);
+    color: #ffffff;
+    border-color: #ffffff;
+}
+body.dark .brutalist-hover:hover {
+    background-color: #ffffff;
+    color: #000000;
+}
+body.dark #projects .grid > div h3 {
+    color: #ffffff;
+}
+body.dark #projects .grid > div p {
+    color: #cccccc;
+}
+body.dark .bg-white\/80 {
+    background-color: rgba(20, 20, 20, 0.85) !important;
+}
+body.dark footer {
+    background-color: rgba(20, 20, 20, 0.85) !important;
+    border-color: #ffffff !important;
+}
+body.dark footer p {
+    color: #cccccc;
+}
+
+/* ===== CURRENTLY WORKING ON SLIDER ===== */
+.cwo-slider-wrapper {
+    position: relative;
+    overflow: hidden;
+    border: 2px solid var(--text-color);
+}
+.cwo-slider {
+    display: flex;
+    transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+}
+.cwo-card {
+    min-width: 100%;
+    padding: 1.75rem 2rem;
+    background-color: var(--card-bg);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-height: 180px;
+}
+.cwo-card-tag {
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.5;
+    margin-bottom: 0.25rem;
+}
+.cwo-card-desc {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    opacity: 0.85;
+    flex: 1;
+}
+.cwo-status {
+    display: inline-block;
+    margin-top: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    border: 1.5px solid var(--text-color);
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    align-self: flex-start;
+}
+.cwo-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border-top: 2px solid var(--text-color);
+    background-color: var(--card-bg);
+}
+.cwo-dot {
+    width: 10px;
+    height: 10px;
+    border: 2px solid var(--text-color);
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.2s;
+}
+.cwo-dot-active {
+    background-color: var(--text-color);
+}
