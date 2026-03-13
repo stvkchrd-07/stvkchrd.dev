@@ -1,203 +1,204 @@
-/*
-=====================================================================
-|                ADMIN PAGE JAVASCRIPT (CORRECTED)                  |
-=====================================================================
-*/
+// js/admin.js — Admin panel with Projects, Blog Posts, Working On
 
-// --- GLOBAL VARIABLES ---
 let supabaseClient;
 
-// --- EVENT LISTENERS ---
+// --- INIT ---
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. CHECK CONFIG AND INITIALIZE SUPABASE CLIENT
     if (!window.env || !window.env.SUPABASE_URL || !window.env.SUPABASE_ANON_KEY) {
-        console.error('Error: Supabase credentials not found. Cannot load admin panel.');
-        showConfigError();
+        showToast('No Supabase config found. Add keys to config.js', 'error');
         return;
     }
-    
     try {
         const { createClient } = window.supabase;
         supabaseClient = createClient(window.env.SUPABASE_URL, window.env.SUPABASE_ANON_KEY);
-        
-        // 2. LOAD DYNAMIC CONTENT
         loadProjects();
         loadBlogPosts();
+        loadWorkingOn();
 
-        // 3. ATTACH FORM LISTENERS
-        const addProjectForm = document.getElementById('add-project-form');
-        if (addProjectForm) {
-            addProjectForm.addEventListener('submit', handleAddProject);
-        }
+        document.getElementById('add-project-form').addEventListener('submit', handleAddProject);
+        document.getElementById('add-blog-form').addEventListener('submit', handleAddBlogPost);
+        document.getElementById('add-working-form').addEventListener('submit', handleAddWorkingOn);
 
-        const addBlogForm = document.getElementById('add-blog-form');
-        if (addBlogForm) {
-            addBlogForm.addEventListener('submit', handleAddBlogPost);
-        }
-    } catch (error) {
-        console.error('Error initializing Supabase client:', error);
-        showConfigError();
+        // Default today's date in blog form
+        document.getElementById('blog-date').value = new Date().toISOString().split('T')[0];
+    } catch (e) {
+        showToast('Error initialising Supabase', 'error');
+        console.error(e);
     }
 });
 
-function showConfigError() {
-    const mainContent = document.querySelector('main');
-    if (mainContent) {
-        mainContent.innerHTML = `
-            <div class="col-span-1 lg:col-span-2">
-                <div class="border-2 border-red-500 p-8 bg-red-50 text-center">
-                    <h2 class="font-black text-3xl md:text-4xl mb-4 text-red-700">Configuration Error</h2>
-                    <p class="text-lg mb-4">The admin panel cannot function without proper Supabase configuration.</p>
-                    <p class="mb-4">For local development, create <code class="bg-gray-200 px-2 py-1">js/config.local.js</code> with your credentials:</p>
-                    <div class="bg-gray-100 p-4 text-left text-sm font-mono mb-4">
-                        <p>window.env = {</p>
-                        <p>&nbsp;&nbsp;SUPABASE_URL: 'https://your-project.supabase.co',</p>
-                        <p>&nbsp;&nbsp;SUPABASE_ANON_KEY: 'your-actual-anon-key'</p>
-                        <p>};</p>
-                    </div>
-                    <p class="mb-4">For production (Netlify), set environment variables in the dashboard.</p>
-                    <p class="text-sm text-gray-600">After updating the config, refresh this page.</p>
-                </div>
-            </div>
-        `;
-    }
+// --- TABS ---
+function switchTab(name) {
+    document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.target.classList.add('active');
 }
 
-// --- PROJECT MANAGEMENT ---
+// --- TOAST ---
+function showToast(msg, type = 'success') {
+    const toast = document.getElementById('admin-toast');
+    toast.textContent = msg;
+    toast.className = 'admin-toast show' + (type === 'error' ? ' error' : '');
+    setTimeout(() => { toast.classList.remove('show'); }, 2800);
+}
 
+// =====================
+// PROJECTS
+// =====================
 async function loadProjects() {
-    if (!supabaseClient) return;
-
-    const { data: projects, error } = await supabaseClient.from('projects').select('*').order('id', { ascending: false });
-    
-    if (error) {
-        console.error('Error fetching projects:', error);
-        return;
-    }
-
-    const projectList = document.getElementById('existing-projects-list');
-    projectList.innerHTML = '';
-
-    if (!projects || projects.length === 0) {
-        projectList.innerHTML = '<p>No projects found. Add one using the form above.</p>';
-        return;
-    }
-
-    projects.forEach(project => {
-        const projectElement = document.createElement('div');
-        projectElement.className = 'border-2 border-black p-4 bg-white flex justify-between items-center';
-        projectElement.innerHTML = `
+    const list = document.getElementById('existing-projects-list');
+    const { data, error } = await supabaseClient.from('projects').select('*').order('id', { ascending: false });
+    if (error) { list.innerHTML = '<p class="admin-empty">Error loading projects.</p>'; return; }
+    if (!data || data.length === 0) { list.innerHTML = '<p class="admin-empty">No projects yet.</p>'; return; }
+    list.innerHTML = '';
+    data.forEach(p => {
+        const el = document.createElement('div');
+        el.className = 'admin-list-item';
+        el.innerHTML = `
             <div>
-                <h4 class="font-bold text-xl">${project.title}</h4>
-                <p>${project.subtitle}</p>
+                <div class="admin-list-item-title">${p.title}</div>
+                <div class="admin-list-item-sub">${p.subtitle || ''}</div>
             </div>
-            <div>
-                <button class="underline text-red-600" onclick="deleteProject(${project.id})">Delete</button>
-            </div>
+            <button class="admin-delete-btn" onclick="deleteProject(${p.id})">Delete</button>
         `;
-        projectList.appendChild(projectElement);
+        list.appendChild(el);
     });
 }
 
-async function handleAddProject(event) {
-    event.preventDefault();
-    if (!supabaseClient) return;
+async function handleAddProject(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type=submit]');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
 
-    const newProject = {
+    const { error } = await supabaseClient.from('projects').insert([{
         title: document.getElementById('project-title').value,
         subtitle: document.getElementById('project-subtitle').value,
         description: document.getElementById('project-description').value,
         imageUrl: document.getElementById('project-image-url').value,
         liveUrl: document.getElementById('project-live-url').value,
-    };
+    }]);
 
-    const { error } = await supabaseClient.from('projects').insert([newProject]);
-    if (error) {
-        console.error('Error adding project:', error);
-        alert('Error: Could not add project.');
-    } else {
-        event.target.reset();
-        loadProjects();
-    }
+    btn.disabled = false;
+    btn.textContent = 'Add Project';
+
+    if (error) { showToast('Error adding project', 'error'); console.error(error); return; }
+    showToast('Project added ✓');
+    e.target.reset();
+    loadProjects();
 }
 
 async function deleteProject(id) {
-    if (confirm('Are you sure you want to delete this project?')) {
-        if (!supabaseClient) return;
-        const { error } = await supabaseClient.from('projects').delete().match({ id: id });
-        if (error) {
-            console.error('Error deleting project:', error);
-            alert('Error: Could not delete project.');
-        } else {
-            loadProjects();
-        }
-    }
+    if (!confirm('Delete this project?')) return;
+    const { error } = await supabaseClient.from('projects').delete().match({ id });
+    if (error) { showToast('Error deleting project', 'error'); return; }
+    showToast('Project deleted');
+    loadProjects();
 }
 
-// --- BLOG POST MANAGEMENT ---
-
+// =====================
+// BLOG POSTS
+// =====================
 async function loadBlogPosts() {
-    if (!supabaseClient) return;
-
-    const { data: posts, error } = await supabaseClient.from('posts').select('*').order('date', { ascending: false });
-    if (error) {
-        console.error('Error fetching posts:', error);
-        return;
-    }
-    
-    const postList = document.getElementById('existing-posts-list');
-    postList.innerHTML = '';
-
-    if (!posts || posts.length === 0) {
-        postList.innerHTML = '<p>No blog posts found. Add one using the form above.</p>';
-        return;
-    }
-
-    posts.forEach(post => {
-        const postElement = document.createElement('div');
-        postElement.className = 'border-2 border-black p-4 bg-white flex justify-between items-center';
-        postElement.innerHTML = `
+    const list = document.getElementById('existing-posts-list');
+    const { data, error } = await supabaseClient.from('posts').select('*').order('date', { ascending: false });
+    if (error) { list.innerHTML = '<p class="admin-empty">Error loading posts.</p>'; return; }
+    if (!data || data.length === 0) { list.innerHTML = '<p class="admin-empty">No posts yet.</p>'; return; }
+    list.innerHTML = '';
+    data.forEach(p => {
+        const el = document.createElement('div');
+        el.className = 'admin-list-item';
+        el.innerHTML = `
             <div>
-                <h4 class="font-bold text-xl">${post.title}</h4>
-                <p>${new Date(post.date).toLocaleDateString()}</p>
+                <div class="admin-list-item-title">${p.title}</div>
+                <div class="admin-list-item-sub">${new Date(p.date).toLocaleDateString()}</div>
             </div>
-            <div>
-                <button class="underline text-red-600" onclick="deletePost(${post.id})">Delete</button>
-            </div>
+            <button class="admin-delete-btn" onclick="deletePost(${p.id})">Delete</button>
         `;
-        postList.appendChild(postElement);
+        list.appendChild(el);
     });
 }
 
-async function handleAddBlogPost(event) {
-    event.preventDefault();
-    if (!supabaseClient) return;
+async function handleAddBlogPost(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type=submit]');
+    btn.disabled = true;
+    btn.textContent = 'Publishing...';
 
-    const newPost = {
+    const { error } = await supabaseClient.from('posts').insert([{
         title: document.getElementById('blog-title').value,
         date: document.getElementById('blog-date').value,
         content: document.getElementById('blog-content').value,
-    };
+    }]);
 
-    const { error } = await supabaseClient.from('posts').insert([newPost]);
-    if (error) {
-        console.error('Error adding post:', error);
-        alert('Error: Could not add post.');
-    } else {
-        event.target.reset();
-        loadBlogPosts();
-    }
+    btn.disabled = false;
+    btn.textContent = 'Publish Post';
+
+    if (error) { showToast('Error publishing post', 'error'); console.error(error); return; }
+    showToast('Post published ✓');
+    e.target.reset();
+    document.getElementById('blog-date').value = new Date().toISOString().split('T')[0];
+    loadBlogPosts();
 }
 
 async function deletePost(id) {
-    if (confirm('Are you sure you want to delete this post?')) {
-        if (!supabaseClient) return;
-        const { error } = await supabaseClient.from('posts').delete().match({ id: id });
-        if (error) {
-            console.error('Error deleting post:', error);
-            alert('Error: Could not delete post.');
-        } else {
-            loadBlogPosts();
-        }
-    }
+    if (!confirm('Delete this post?')) return;
+    const { error } = await supabaseClient.from('posts').delete().match({ id });
+    if (error) { showToast('Error deleting post', 'error'); return; }
+    showToast('Post deleted');
+    loadBlogPosts();
+}
+
+// =====================
+// CURRENTLY WORKING ON
+// =====================
+async function loadWorkingOn() {
+    const list = document.getElementById('existing-working-list');
+    const { data, error } = await supabaseClient.from('working_on').select('*').order('id', { ascending: false });
+    if (error) { list.innerHTML = '<p class="admin-empty">Error loading cards.</p>'; return; }
+    if (!data || data.length === 0) { list.innerHTML = '<p class="admin-empty">No cards yet.</p>'; return; }
+    list.innerHTML = '';
+    data.forEach(w => {
+        const el = document.createElement('div');
+        el.className = 'admin-list-item';
+        el.innerHTML = `
+            <div>
+                <div class="admin-list-item-title">${w.title}</div>
+                <div class="admin-list-item-sub">${w.tag || ''} ${w.status ? '· ' + w.status : ''}</div>
+            </div>
+            <button class="admin-delete-btn" onclick="deleteWorkingOn(${w.id})">Delete</button>
+        `;
+        list.appendChild(el);
+    });
+}
+
+async function handleAddWorkingOn(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type=submit]');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    const { error } = await supabaseClient.from('working_on').insert([{
+        title: document.getElementById('working-title').value,
+        tag: document.getElementById('working-tag').value,
+        description: document.getElementById('working-description').value,
+        status: document.getElementById('working-status').value || 'Active',
+    }]);
+
+    btn.disabled = false;
+    btn.textContent = 'Add Card';
+
+    if (error) { showToast('Error adding card', 'error'); console.error(error); return; }
+    showToast('Card added ✓');
+    e.target.reset();
+    loadWorkingOn();
+}
+
+async function deleteWorkingOn(id) {
+    if (!confirm('Delete this card?')) return;
+    const { error } = await supabaseClient.from('working_on').delete().match({ id });
+    if (error) { showToast('Error deleting card', 'error'); return; }
+    showToast('Card deleted');
+    loadWorkingOn();
 }
