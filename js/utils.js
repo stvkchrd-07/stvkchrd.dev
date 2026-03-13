@@ -1,5 +1,3 @@
-// js/utils.js — shared utilities across all pages
-
 function copyEmailToClipboard(email) {
     if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(email).then(() => {
@@ -25,7 +23,17 @@ function fallbackCopy(email) {
 function showCopyToast(email) {
     const toast = document.getElementById('copy-toast');
     if (!toast) return;
-    toast.textContent = `${email} copied to clipboard`;
+    toast.textContent = email + ' copied to clipboard';
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 800);
+}
+
+function toggleMenu() {
+    const menu = document.getElementById('mobile-menu');
+    const icon = document.getElementById('hamburger-icon');
+    if (!menu) return;
+    const isOpen = menu.classList.contains('open');
+    menu.classList.toggle('open', !isOpen);
+    menu.classList.toggle('hidden', isOpen);
+    if (icon) icon.textContent = isOpen ? '☰' : '✕';
 }

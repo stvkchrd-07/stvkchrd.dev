@@ -1,5 +1,3 @@
-// js/rao.js — RAO AI | Groq + ElevenLabs + Web Speech
-
 let raoListening = false;
 let raoRecognition = null;
 let raoConversationHistory = [];
@@ -20,14 +18,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        // No speech support — show text fallback
         const micBtn = document.getElementById('rao-mic-btn');
         if (micBtn) micBtn.style.display = 'none';
         const fallback = document.getElementById('rao-fallback');
         if (fallback) fallback.style.display = 'flex';
         return;
     }
-
     setupSpeechRecognition();
 });
 
@@ -47,11 +43,8 @@ function setupSpeechRecognition() {
 
     raoRecognition.onend = () => {
         raoListening = false;
-        // Only reset to idle if not already in thinking state
         const btn = document.getElementById('rao-mic-btn');
-        if (btn && btn.classList.contains('rao-mic-listening')) {
-            setMicState('idle');
-        }
+        if (btn && btn.classList.contains('rao-mic-listening')) setMicState('idle');
     };
 
     raoRecognition.onerror = (e) => {
@@ -62,25 +55,18 @@ function setupSpeechRecognition() {
 }
 
 async function toggleMic() {
-    if (raoListening) {
-        stopListening();
-        return;
-    }
-
-    // Ask for mic permission once, then start listening
+    if (raoListening) { stopListening(); return; }
     if (!micPermissionGranted) {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            stream.getTracks().forEach(t => t.stop()); // release stream, we just needed the grant
+            stream.getTracks().forEach(t => t.stop());
             micPermissionGranted = true;
-            // Re-init recognition after permission granted (fixes the mobile stop bug)
             setupSpeechRecognition();
         } catch (err) {
             appendMessage('mic permission nahi mila. browser settings mein allow karo. rao ki jai ho 🙏', 'ai');
             return;
         }
     }
-
     startListening();
 }
 
@@ -91,8 +77,6 @@ function startListening() {
         raoListening = true;
         setMicState('listening');
     } catch (e) {
-        console.error('Recognition start error:', e);
-        // If already started, stop and retry once
         raoRecognition.stop();
         setTimeout(() => {
             try { raoRecognition.start(); raoListening = true; setMicState('listening'); }
@@ -137,25 +121,17 @@ async function sendToGroq(userText) {
     try {
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${groqKey}`
-            },
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + groqKey },
             body: JSON.stringify({
                 model: 'llama-3.1-8b-instant',
                 max_tokens: 150,
                 messages: [
-                    {
-                        role: 'system',
-                        content: `You are RAO AI — a fun, casual, helpful voice assistant on Satvik Chaturvedi's personal website. Named after his friend Rao. Keep replies SHORT (2-3 sentences max) because responses are spoken aloud. Be friendly and playful. You MUST end every single reply with the exact phrase: "rao ki jai ho" — no exceptions. No markdown, no asterisks. Plain conversational text only.`
-                    },
+                    { role: 'system', content: 'You are RAO AI — a fun, casual, helpful voice assistant on Satvik Chaturvedi\'s personal website. Named after his friend Rao. Keep replies SHORT (2-3 sentences max) because responses are spoken aloud. Be friendly and playful. You MUST end every single reply with the exact phrase: "rao ki jai ho" — no exceptions. No markdown, no asterisks. Plain conversational text only.' },
                     ...raoConversationHistory
                 ]
             })
         });
-
         const data = await response.json();
-
         if (data.choices && data.choices[0] && data.choices[0].message) {
             const replyText = data.choices[0].message.content;
             raoConversationHistory.push({ role: 'assistant', content: replyText });
@@ -172,31 +148,16 @@ async function sendToGroq(userText) {
         await speakElevenLabs(errMsg, elevenKey);
         console.error('Groq error:', err);
     }
-
     setMicState('idle');
 }
 
 async function speakElevenLabs(text, apiKey) {
-    if (!apiKey || apiKey === 'YOUR_ELEVENLABS_API_KEY_HERE') {
-        browserSpeak(text);
-        return;
-    }
+    if (!apiKey || apiKey === 'YOUR_ELEVENLABS_API_KEY_HERE') { browserSpeak(text); return; }
     try {
         const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/pNInz6obpgDQGcFmaJgB', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'xi-api-key': apiKey
-            },
-            body: JSON.stringify({
-                text: text,
-                model_id: 'eleven_turbo_v2_5',
-                voice_settings: {
-                    stability: 0.5,
-                    similarity_boost: 0.75,
-                    speed: 0.88
-                }
-            })
+            headers: { 'Content-Type': 'application/json', 'xi-api-key': apiKey },
+            body: JSON.stringify({ text: text, model_id: 'eleven_turbo_v2_5', voice_settings: { stability: 0.5, similarity_boost: 0.75, speed: 0.88 } })
         });
         if (!response.ok) { browserSpeak(text); return; }
         const audioBlob = await response.blob();
@@ -204,9 +165,7 @@ async function speakElevenLabs(text, apiKey) {
         const audio = new Audio(audioUrl);
         audio.play();
         audio.onended = () => URL.revokeObjectURL(audioUrl);
-    } catch (err) {
-        browserSpeak(text);
-    }
+    } catch (err) { browserSpeak(text); }
 }
 
 function browserSpeak(text) {
