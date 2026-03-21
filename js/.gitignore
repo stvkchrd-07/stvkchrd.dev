@@ -1,0 +1,6 @@
+# Local dev only — contains real API keys, never commit this
+js/config.local.js
+
+# Environment
+.env
+.env.local

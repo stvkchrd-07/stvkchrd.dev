@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Post | Satvik Chaturvedi</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+
+    <script src="js/config.local.js"></script>
+    <script src="js/config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
+
+    <link rel="icon" type="image/png" href="logo2.png">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .post-content h1, .post-content h2, .post-content h3 { font-weight: 900; margin-top: 1.5em; margin-bottom: 0.5em; }
+        .post-content h1 { font-size: 2.25rem; }
+        .post-content h2 { font-size: 1.875rem; }
+        .post-content h3 { font-size: 1.5rem; }
+        .post-content p { margin-bottom: 1em; line-height: 1.6; }
+        .post-content a { color: inherit; text-decoration: underline; }
+        .post-content ul, .post-content ol { margin-left: 1.5rem; margin-bottom: 1em; list-style-type: disc; }
+        .post-content li { margin-bottom: 0.5em; }
+        .post-content blockquote { border-left: 4px solid var(--text-color); padding-left: 1rem; margin-left: 0; font-style: italic; }
+        .post-content pre { background-color: #f4f4f4; border: 1px solid #ddd; padding: 1rem; overflow-x: auto; margin-bottom: 1em; }
+        .post-content code { font-family: 'Courier New', monospace; background-color: #f4f4f4; padding: 0.2em 0.4em; }
+        .post-content pre code { background-color: transparent; padding: 0; }
+    </style>
+</head>
+<body class="p-4 md:p-8 dark">
+
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="content-wrapper max-w-7xl mx-auto">
+        <header class="mb-12 md:mb-20">
+            <div class="flex flex-col md:flex-row justify-between md:items-center border-b-2 border-black pb-4 mb-4">
+                <a href="./index.html" class="font-black text-5xl sm:text-6xl md:text-7xl tracking-tighter hover:underline">Satvik Chaturvedi</a>
+                <nav class="mt-4 md:mt-0">
+                    <ul class="flex space-x-2 flex-wrap gap-y-2">
+                        <li><a href="https://x.com/StvkChrd" target="_blank" rel="noopener" class="brutalist-hover block border-2 border-black p-3 font-bold">X</a></li>
+                        <li><a href="https://www.linkedin.com/in/stvkchrd" target="_blank" rel="noopener" class="brutalist-hover block border-2 border-black p-3 font-bold">in</a></li>
+                        <li><a href="mailto:satvikc73@gmail.com" class="brutalist-hover block border-2 border-black p-3 font-bold">@</a></li>
+                        <li><a href="./blog.html" class="brutalist-hover block border-2 border-black px-4 py-3 font-bold">BLOG</a></li>
+                        <li><button onclick="openRao()" class="brutalist-hover block border-2 border-black px-4 py-3 font-bold">RAO AI ✦</button></li>
+                        <li><button id="theme-toggle" class="brutalist-hover block border-2 border-black p-3 font-bold" title="Toggle theme" aria-label="Toggle dark/light mode"><span id="theme-icon">☀️</span></button></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <main>
+            <article id="single-post-container" class="border-2 border-black p-6 md:p-8 bg-white/80 backdrop-blur-sm">
+                <div id="post-loading"><p class="text-lg">Loading post...</p></div>
+                <div id="post-content-area" class="hidden">
+                    <p id="post-date" class="text-base mb-2"></p>
+                    <h1 id="post-title" class="font-black text-3xl md:text-4xl mb-8"></h1>
+                    <div id="post-body" class="post-content"></div>
+                </div>
+                <div id="post-not-found" class="hidden">
+                    <h1 class="font-black text-3xl md:text-4xl mb-4">Post Not Found</h1>
+                    <p>Sorry, couldn't find this post.</p>
+                    <a href="./blog.html" class="font-bold underline hover:no-underline mt-4 inline-block">← Back to Blog</a>
+                </div>
+            </article>
+            <div class="h-32 md:h-64 lg:h-96"></div>
+        </main>
+
+        <footer class="mt-20 pt-8 border-t-2 border-black bg-white/80 backdrop-blur-sm">
+            <div class="text-center">
+                <p class="mb-2">
+                    <span onclick="copyEmailToClipboard('satvikc73@gmail.com')" class="underline hover:no-underline cursor-pointer">satvikc73@gmail.com</span>
+                </p>
+                <p>© 2025 Satvik Chaturvedi. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- RAO AI Modal -->
+    <div id="rao-modal">
+        <div class="rao-modal-content">
+            <div class="rao-header">
+                <span class="font-black text-xl">RAO AI ✦</span>
+                <button class="rao-close" onclick="closeRao()">&times;</button>
+            </div>
+            <div id="rao-messages" class="rao-messages">
+                <div class="rao-msg rao-msg-ai">hey, what do you want? 👀</div>
+            </div>
+            <div class="rao-voice-section">
+                <button id="rao-mic-btn" class="rao-mic-btn rao-mic-idle" onclick="toggleMic()" title="Tap to speak">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+                        <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm7 8a1 1 0 0 1 1 1 8 8 0 0 1-7 7.93V22h2a1 1 0 0 1 0 2H9a1 1 0 0 1 0-2h2v-2.07A8 8 0 0 1 4 12a1 1 0 0 1 2 0 6 6 0 0 0 12 0 1 1 0 0 1 1-1z"/>
+                    </svg>
+                </button>
+                <span id="rao-status" class="rao-status-text">tap to speak</span>
+            </div>
+            <div id="rao-fallback" class="rao-input-row" style="display:none">
+                <input id="rao-text-input" type="text" placeholder="type your question..." autocomplete="off" onkeydown="if(event.key==='Enter') sendRaoText()" />
+                <button onclick="sendRaoText()">SEND</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="copy-toast"></div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/main.js" defer></script>
+    <script src="js/post.js" defer></script>
+    <script src="js/rao.js" defer></script>
+</body>
+</html>

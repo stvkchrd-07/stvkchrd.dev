@@ -1,0 +1,259 @@
+diff a/js/main.js b/js/main.js	(rejected hunks)
+@@ -57,6 +57,9 @@ function animateParticleColorTo(targetCssColor, durationMs = 300) {
+ // --- THEME TOGGLE FUNCTIONS ---
+ function applyTheme(theme) {
+     document.body.classList.toggle('dark', theme === 'dark');
++    // Update icon: show sun when dark (click to go light), moon when light (click to go dark)
++    const icon = document.getElementById('theme-icon');
++    if (icon) icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+     if (particlesMaterial) {
+         const particleColor = getParticleCssColor();
+         animateParticleColorTo(particleColor, 350);
+@@ -78,13 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
+         themeToggleButton.addEventListener('click', toggleTheme);
+     }
+ 
+-    const raoAiLink = document.getElementById('rao-ai-link');
+-    if (raoAiLink) {
+-        const configuredRaoUrl = normalizeUrl(window.env?.RAO_BACKEND_URL);
+-        if (configuredRaoUrl) {
+-            raoAiLink.href = configuredRaoUrl;
+-        }
+-    }
+ 
+     // 2. CHECK CONFIG AND INITIALIZE SUPABASE CLIENT
+     if (!window.env || !window.env.SUPABASE_URL || !window.env.SUPABASE_ANON_KEY) {
+@@ -103,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
+ 
+     // 3. INITIALIZE THREE.JS AND APPLY THEME
+     initializeThreeJS();
+-    const savedTheme = localStorage.getItem('theme') || 'light';
++    const savedTheme = localStorage.getItem('theme') || 'dark';
+     applyTheme(savedTheme);
+ });
+ 
+@@ -207,27 +203,7 @@ window.onclick = function(event) {
+     }
+ }
+ 
+-// --- EMAIL COPY SCRIPT ---
+-function copyEmailToClipboard(email) {
+-    const textArea = document.createElement('textarea');
+-    textArea.value = email;
+-    textArea.style.position = 'fixed';
+-    document.body.appendChild(textArea);
+-    textArea.focus();
+-    textArea.select();
+-    try {
+-        document.execCommand('copy');
+-        const toast = document.getElementById('copy-toast');
+-        if (toast) {
+-            toast.textContent = `${email} copied to clipboard`;
+-            toast.classList.add('show');
+-            setTimeout(() => { toast.classList.remove('show'); }, 800);
+-        }
+-    } catch (err) {
+-        console.error('Fallback: Oops, unable to copy', err);
+-    }
+-    document.body.removeChild(textArea);
+-}
++// copyEmailToClipboard is in utils.js
+ 
+ // --- THREE.JS BACKGROUND SCRIPT ---
+ function initializeThreeJS() {
+@@ -254,19 +230,74 @@ function initializeThreeJS() {
+         
+         const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+         scene.add(particles);
+-        const mouse = new THREE.Vector2();
+-        window.addEventListener('mousemove', (event) => { mouse.x = (event.clientX / window.innerWidth) * 2 - 1; mouse.y = -(event.clientY / window.innerHeight) * 2 + 1; }, { passive: true });
++        // Target rotation driven by mouse or gyro
++        const target = { x: 0, y: 0 };
++        let gyroActive = false;
++
++        // --- DESKTOP: mouse moves particles ---
++        window.addEventListener('mousemove', (event) => {
++            if (gyroActive) return; // gyro takes priority on mobile
++            target.x = ((event.clientY / window.innerHeight) - 0.5) * 1.2;
++            target.y = ((event.clientX / window.innerWidth) - 0.5) * 1.2;
++        }, { passive: true });
++
++        // --- MOBILE GYROSCOPE ---
++        function enableGyro() {
++            gyroActive = true;
++            let baseAlpha = null; // calibrate on first reading
++
++            window.addEventListener('deviceorientation', (event) => {
++                // beta  = front-back tilt (-180 to 180), controls X rotation
++                // gamma = left-right tilt (-90 to 90),  controls Y rotation
++                const beta  = event.beta  !== null ? event.beta  : 0;
++                const gamma = event.gamma !== null ? event.gamma : 0;
++
++                // Normalise: phone held upright (beta~90) = neutral
++                target.x = THREE.MathUtils.clamp((beta - 90) / 60, -1, 1) * 1.5;
++                target.y = THREE.MathUtils.clamp(gamma / 45, -1, 1) * 1.5;
++            }, { passive: true });
++        }
++
++        const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
++        const isIOS    = /iPhone|iPad/i.test(navigator.userAgent);
++
++        if (isMobile) {
++            if (isIOS && typeof DeviceOrientationEvent !== 'undefined'
++                      && typeof DeviceOrientationEvent.requestPermission === 'function') {
++                // Show a clean one-time button — auto-removed after tap
++                const gyroBtn = document.createElement('button');
++                gyroBtn.id = 'gyro-permission-btn';
++                gyroBtn.textContent = '🔄 Enable Motion';
++                gyroBtn.style.cssText = [
++                    'position:fixed', 'bottom:24px', 'left:50%',
++                    'transform:translateX(-50%)', 'z-index:999',
++                    'padding:12px 24px', 'font-family:Inter,sans-serif',
++                    'font-weight:900', 'font-size:0.85rem', 'letter-spacing:0.06em',
++                    'border:2px solid #000', 'background:#fff', 'color:#000',
++                    'cursor:pointer', 'box-shadow:3px 3px 0 #000'
++                ].join(';');
++                document.body.appendChild(gyroBtn);
++
++                gyroBtn.addEventListener('click', () => {
++                    DeviceOrientationEvent.requestPermission()
++                        .then(state => { if (state === 'granted') enableGyro(); })
++                        .catch(() => {});
++                    gyroBtn.style.opacity = '0';
++                    gyroBtn.style.transition = 'opacity 0.3s';
++                    setTimeout(() => gyroBtn.remove(), 350);
++                });
++            } else {
++                // Android — fires without permission
++                enableGyro();
++            }
++        }
++
+         const clock = new THREE.Clock();
+         const animate = () => {
+-            const elapsedTime = clock.getElapsedTime();
+-            particles.rotation.y = -0.04 * elapsedTime; // Slower
+-            particles.rotation.x = -0.04 * elapsedTime; // Slower
+-            if(mouse.x !== 0 && mouse.y !== 0){
+-                const targetX = mouse.x * 0.2;
+-                const targetY = mouse.y * 0.2;
+-                particles.rotation.y += (targetX - particles.rotation.y) * 0.01; // Slower
+-                particles.rotation.x += (targetY - particles.rotation.x) * 0.01; // Slower
+-            }
++            clock.getDelta(); // keep clock ticking but don't use elapsed for rotation
++            // Smooth lerp towards target — feels like the scene is floating
++            particles.rotation.x += (target.x - particles.rotation.x) * 0.05;
++            particles.rotation.y += (target.y - particles.rotation.y) * 0.05;
+             renderer.render(scene, camera);
+             window.requestAnimationFrame(animate);
+         };
+@@ -278,4 +309,107 @@ function initializeThreeJS() {
+         }, { passive: true });
+         animate();
+     }
+-}
+\ No newline at end of file
++}
++
++// --- CURRENTLY WORKING ON SLIDER ---
++const sampleWorkingOn = [
++    {
++        title: "TheCommonCo",
++        tag: "Streetwear / Merch",
++        description: "Scaling bulk corporate merch orders. Working on overseas pricing models and influencer outreach campaigns.",
++        status: "Active"
++    },
++    {
++        title: "Sirenn",
++        tag: "Luxury Streetwear",
++        description: "Building the brand identity and early product line for a future luxury streetwear label.",
++        status: "Building"
++    },
++    {
++        title: "SurFlow Events",
++        tag: "Event Management",
++        description: "Connecting underrated artists with cafés, restaurants, and corporate venues for curated weekend experiences.",
++        status: "Active"
++    }
++];
++
++let cwoIndex = 0;
++
++function initCWO(items) {
++    const slider = document.getElementById('cwo-slider');
++    const dotsContainer = document.getElementById('cwo-dots');
++    if (!slider || !dotsContainer) return;
++
++    slider.innerHTML = '';
++    dotsContainer.innerHTML = '';
++
++    items.forEach((item, i) => {
++        const card = document.createElement('div');
++        card.className = 'cwo-card';
++        card.innerHTML = `
++            <div class="cwo-card-tag">${item.tag || ''}</div>
++            <h3 class="font-black text-2xl md:text-3xl mb-2">${item.title}</h3>
++            <p class="cwo-card-desc">${item.description}</p>
++            <span class="cwo-status">${item.status || 'In Progress'}</span>
++        `;
++        slider.appendChild(card);
++
++        const dot = document.createElement('button');
++        dot.className = 'cwo-dot' + (i === 0 ? ' cwo-dot-active' : '');
++        dot.setAttribute('aria-label', `Go to card ${i + 1}`);
++        dot.addEventListener('click', () => goToCWO(i));
++        dotsContainer.appendChild(dot);
++    });
++
++    goToCWO(0);
++
++    // Auto-advance every 4s
++    setInterval(() => {
++        cwoIndex = (cwoIndex + 1) % items.length;
++        goToCWO(cwoIndex);
++    }, 4000);
++
++    // Touch swipe support
++    let touchStartX = 0;
++    slider.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
++    slider.addEventListener('touchend', e => {
++        const diff = touchStartX - e.changedTouches[0].clientX;
++        if (Math.abs(diff) > 40) {
++            cwoIndex = diff > 0
++                ? Math.min(cwoIndex + 1, items.length - 1)
++                : Math.max(cwoIndex - 1, 0);
++            goToCWO(cwoIndex);
++        }
++    }, { passive: true });
++}
++
++function goToCWO(index) {
++    cwoIndex = index;
++    const slider = document.getElementById('cwo-slider');
++    if (slider) slider.style.transform = `translateX(-${index * 100}%)`;
++    document.querySelectorAll('.cwo-dot').forEach((dot, i) => {
++        dot.classList.toggle('cwo-dot-active', i === index);
++    });
++}
++
++document.addEventListener('DOMContentLoaded', () => {
++    // Load CWO from Supabase if available, else use sample
++    if (window.supabase && window.env && window.env.SUPABASE_URL) {
++        try {
++            const { createClient } = window.supabase;
++            const client = createClient(window.env.SUPABASE_URL, window.env.SUPABASE_ANON_KEY);
++            client.from('working_on').select('*').order('id', { ascending: false })
++                .then(({ data, error }) => {
++                    if (error || !data || data.length === 0) {
++                        initCWO(sampleWorkingOn);
++                    } else {
++                        initCWO(data);
++                    }
++                });
++        } catch(e) {
++            initCWO(sampleWorkingOn);
++        }
++    } else {
++        initCWO(sampleWorkingOn);
++    }
++});
