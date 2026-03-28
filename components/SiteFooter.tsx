@@ -1,42 +1,26 @@
 'use client';
 
-function copyEmail() {
-  const email = 'satvikc73@gmail.com';
-  if (navigator.clipboard && window.isSecureContext) {
-    navigator.clipboard.writeText(email).then(() => showToast(email));
-  } else {
-    const el = document.createElement('textarea');
-    el.value = email;
-    el.style.position = 'fixed';
-    document.body.appendChild(el);
-    el.focus(); el.select();
-    try { document.execCommand('copy'); showToast(email); } catch {}
-    document.body.removeChild(el);
-  }
-}
-
-function showToast(email: string) {
-  const toast = document.getElementById('copy-toast');
-  if (!toast) return;
-  toast.textContent = `${email} copied to clipboard`;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 800);
-}
+import React from 'react';
 
 export default function SiteFooter() {
   return (
-    <>
-      <footer className="mt-20 pt-8 border-t-2 border-black bg-white/80 backdrop-blur-sm">
-        <div className="text-center">
-          <p className="mb-2">
-            <span onClick={copyEmail} className="underline hover:no-underline cursor-pointer">
-              satvikc73@gmail.com
-            </span>
-          </p>
-          <p>© 2025 Satvik Chaturvedi. All rights reserved.</p>
-        </div>
-      </footer>
-      <div id="copy-toast" />
-    </>
+    <footer className="w-full mt-20 pb-10 border-t-[1px] border-[var(--text-color)] opacity-30">
+      <div className="flex flex-col md:flex-row justify-between items-center pt-4 gap-2">
+        
+        {/* Minimalist Email Link */}
+        <a
+          href="mailto:satvikc73@gmail.com"
+          className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] hover:text-[var(--accent-color)] transition-colors"
+        >
+          satvikc73@gmail.com
+        </a>
+
+        {/* Minimalist Copyright */}
+        <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.3em] text-center md:text-right">
+          © 2025 Satvik Chaturvedi &bull; All rights reserved.
+        </span>
+        
+      </div>
+    </footer>
   );
 }
