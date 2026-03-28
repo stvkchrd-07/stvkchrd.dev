@@ -1,3 +1,8 @@
+#!/bin/bash
+
+echo "🩹 Patching Supabase Client in Admin Dashboard..."
+
+cat << 'EOF' > app/admin/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -122,3 +127,6 @@ export default function AdminDashboard() {
     </div>
   );
 }
+EOF
+
+echo "✅ Admin dashboard patched with core Supabase Client!"
