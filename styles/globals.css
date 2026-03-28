@@ -6,7 +6,7 @@
     --bg-color: #FFFFFF;
     --text-color: #000000;
     --card-bg: #FFFFFF;
-    --accent-color: #CCFF00; /* Neon Yellow */
+    --accent-color: #CCFF00;
     --border-weight: 2px;
 }
 
@@ -24,6 +24,8 @@ body {
     overflow-x: hidden;
     line-height: 1.2;
     letter-spacing: -0.02em;
+    /* Remove default tap highlight on mobile for cleaner feel */
+    -webkit-tap-highlight-color: transparent; 
 }
 
 * { border-radius: 0 !important; }
@@ -33,9 +35,7 @@ body {
     z-index: 1;
 }
 
-/* SMOOTH THEME ENGINE:
-  This gracefully fades backgrounds and text colors globally when switching themes.
-*/
+/* Smooth Theme Transitions */
 body, 
 .bg-\[var\(--bg-color\)\], 
 .bg-\[var\(--card-bg\)\], 
@@ -45,37 +45,42 @@ body,
     transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out, border-color 0.5s ease-in-out;
 }
 
-/* Strict Borders */
 .strict-border {
     border: var(--border-weight) solid var(--text-color);
-    transition: border-color 0.5s ease-in-out; /* Smooth border color change */
+    transition: border-color 0.5s ease-in-out;
 }
 
-/* INSTANT HOVERS:
-  We override the smooth transitions here so your hover effects stay raw and snappy.
-*/
+/* Base states (no transitions for snappiness) */
 .strict-hover {
     transition: transform 0s, background-color 0s, color 0s !important;
 }
-
-.strict-hover:hover {
-    background-color: var(--text-color) !important;
-    color: var(--bg-color) !important;
-}
-
 .accent-hover {
     transition: transform 0.05s linear !important;
 }
 
-.accent-hover:hover {
-    background-color: var(--accent-color) !important;
-    color: #000000 !important;
-    border-color: #000000 !important;
-    transform: translate(-3px, -3px);
+/* DESKTOP ONLY: Hover effects */
+@media (hover: hover) {
+    .strict-hover:hover {
+        background-color: var(--text-color) !important;
+        color: var(--bg-color) !important;
+    }
+    .accent-hover:hover {
+        background-color: var(--accent-color) !important;
+        color: #000000 !important;
+        border-color: #000000 !important;
+        transform: translate(-3px, -3px);
+    }
 }
 
+/* MOBILE/TOUCH ONLY: Active (Tap) effects for tactile feedback */
+.strict-hover:active {
+    background-color: var(--text-color) !important;
+    color: var(--bg-color) !important;
+}
 .accent-hover:active {
-    transform: translate(2px, 2px);
+    transform: translate(2px, 2px) !important;
+    background-color: var(--accent-color) !important;
+    color: #000000 !important;
 }
 
 ::selection {

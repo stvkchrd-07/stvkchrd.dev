@@ -14,9 +14,9 @@ export default function SiteHeader({ active }: { active?: 'home' | 'blog' }) {
 
   return (
     <>
-      <header className="mb-10 md:mb-16">
+      <header className="mb-8 md:mb-16">
         <div className="flex flex-row justify-between items-center border-b-[2px] border-[var(--text-color)] pb-3 mb-4">
-          <Link href="/" className="site-name font-black text-2xl md:text-3xl uppercase tracking-tighter hover:bg-[var(--accent-color)] hover:text-black transition-none px-2 py-1 -ml-2">
+          <Link href="/" className="site-name font-black text-xl sm:text-2xl md:text-3xl uppercase tracking-tighter hover:bg-[var(--accent-color)] hover:text-black transition-none px-2 py-1 -ml-2">
             Satvik Chaturvedi
           </Link>
 
@@ -46,15 +46,14 @@ export default function SiteHeader({ active }: { active?: 'home' | 'blog' }) {
             </ul>
           </nav>
 
-          <div className="flex items-center space-x-2 md:hidden text-sm">
+          <div className="flex items-center space-x-2 md:hidden text-xs sm:text-sm">
             <ThemeToggle />
-            <motion.button 
-              whileTap={{ y: 2 }}
+            <button 
               onClick={() => setMenuOpen(!menuOpen)}
-              className="strict-border px-3 py-1.5 font-black uppercase bg-[var(--accent-color)] text-black"
+              className="strict-border px-3 py-2 font-black uppercase bg-[var(--accent-color)] text-black active:translate-y-1 active:shadow-none transition-transform"
             >
-              {menuOpen ? 'CLOSE' : 'MENU'}
-            </motion.button>
+              {menuOpen ? 'CLOSE ✕' : 'MENU ☰'}
+            </button>
           </div>
         </div>
 
@@ -67,9 +66,9 @@ export default function SiteHeader({ active }: { active?: 'home' | 'blog' }) {
               transition={{ duration: 0.1, ease: "linear" }}
               className="overflow-hidden border-b-[2px] border-[var(--text-color)] bg-[var(--bg-color)] md:hidden"
             >
-              <ul className="flex flex-col text-base uppercase">
-                <Link href="/blog" className="p-3 font-black border-b-[2px] border-[var(--text-color)] text-left w-full strict-hover">BLOG</Link>
-                <button onClick={() => { setRaoOpen(true); setMenuOpen(false); }} className="p-3 font-black text-left w-full bg-[var(--accent-color)] text-black hover:bg-[var(--text-color)] hover:text-[var(--accent-color)] transition-none">RAO AI ✦</button>
+              <ul className="flex flex-col text-sm sm:text-base uppercase">
+                <Link href="/blog" className="p-4 font-black border-b-[2px] border-[var(--text-color)] text-left w-full active:bg-[var(--text-color)] active:text-[var(--bg-color)]">BLOG</Link>
+                <button onClick={() => { setRaoOpen(true); setMenuOpen(false); }} className="p-4 font-black text-left w-full bg-[var(--accent-color)] text-black active:bg-[var(--text-color)] active:text-[var(--accent-color)]">RAO AI ✦</button>
               </ul>
             </motion.div>
           )}

@@ -17,20 +17,18 @@ export default function CWOCard({ item }: { item: CWOItem }) {
         <div className="card-pattern-grid" />
         <div className="card-overlay-dots" />
         
-        {/* Top Decorative Pattern */}
         <div className="bold-pattern">
           <svg viewBox="0 0 100 100">
             <path strokeDasharray="15 10" strokeWidth={10} stroke="var(--text-color)" fill="none" d="M0,0 L100,0 L100,100 L0,100 Z" />
           </svg>
         </div>
         
-        {/* Header Section */}
-        <div className="card-title-area">
-          <span className="truncate pr-4">{item.title}</span>
-          {item.tag && <span className="card-tag whitespace-nowrap">{item.tag}</span>}
+        {/* Adjusted header for mobile: allows wrapping if tags get squished */}
+        <div className="card-title-area flex-col items-start sm:flex-row sm:items-center gap-2 sm:gap-0">
+          <span className="truncate w-full sm:w-auto sm:pr-4">{item.title}</span>
+          {item.tag && <span className="card-tag whitespace-nowrap self-start sm:self-auto">{item.tag}</span>}
         </div>
         
-        {/* Body Section */}
         <div className="card-body flex-1 flex flex-col">
           <div className="card-description flex-1">
             {item.description}
@@ -38,12 +36,11 @@ export default function CWOCard({ item }: { item: CWOItem }) {
           
           <div className="card-actions">
             {item.status && (
-              <button className="card-button">{item.status}</button>
+              <button className="card-button accent-hover">{item.status}</button>
             )}
           </div>
         </div>
         
-        {/* Bottom Decorative Dots */}
         <div className="dots-pattern">
           <svg viewBox="0 0 80 40">
             {[10, 30, 50, 70].map(cx => (
@@ -60,9 +57,10 @@ export default function CWOCard({ item }: { item: CWOItem }) {
       </div>
 
       <style jsx>{`
-        .cwo-wrapper {
-          font-size: 16px; /* Base size for em scaling */
-        }
+        /* MAGIC SCALING: Adjusting base font size scales the entire em-based card layout! */
+        .cwo-wrapper { font-size: 13px; }
+        @media (min-width: 640px) { .cwo-wrapper { font-size: 14px; } }
+        @media (min-width: 1024px) { .cwo-wrapper { font-size: 16px; } }
         
         .card {
           --primary: var(--text-color);
@@ -75,21 +73,36 @@ export default function CWOCard({ item }: { item: CWOItem }) {
           width: 100%;
           background: var(--bg);
           border: 2px solid var(--text-color);
-          border-radius: 0.6em; /* Requested rounded edges */
+          border-radius: 0.6em;
           box-shadow: 6px 6px 0 var(--shadow-color);
           transition: all 0.2s ease-out;
           overflow: hidden;
           z-index: 1;
         }
 
-        .card:hover {
-          transform: translate(-4px, -4px);
-          box-shadow: 10px 10px 0 var(--shadow-color);
+        /* Hover effects mapped to hover-capable devices only */
+        @media (hover: hover) {
+          .card:hover {
+            transform: translate(-4px, -4px);
+            box-shadow: 10px 10px 0 var(--shadow-color);
+          }
+          .card:hover .card-pattern-grid,
+          .card:hover .card-overlay-dots {
+            opacity: 1;
+          }
+          .card:hover .accent-shape {
+            transform: rotate(90deg) scale(1.2);
+          }
+          .card:hover .card-tag {
+            transform: rotate(-2deg) scale(1.05);
+            background: var(--accent);
+          }
         }
 
-        .card:hover .card-pattern-grid,
-        .card:hover .card-overlay-dots {
-          opacity: 1;
+        /* Tactile touch feedback */
+        .card:active {
+          transform: translate(2px, 2px);
+          box-shadow: 4px 4px 0 var(--shadow-color);
         }
 
         .card-pattern-grid {
@@ -117,10 +130,8 @@ export default function CWOCard({ item }: { item: CWOItem }) {
 
         .bold-pattern {
           position: absolute;
-          top: 0;
-          right: 0;
-          width: 6em;
-          height: 6em;
+          top: 0; right: 0;
+          width: 6em; height: 6em;
           opacity: 0.1;
           pointer-events: none;
           z-index: -1;
@@ -134,8 +145,6 @@ export default function CWOCard({ item }: { item: CWOItem }) {
           font-weight: 900;
           font-size: 1.2em;
           display: flex;
-          justify-content: space-between;
-          align-items: center;
           border-bottom: 2px solid var(--text-color);
           text-transform: uppercase;
           letter-spacing: 0.05em;
@@ -153,11 +162,6 @@ export default function CWOCard({ item }: { item: CWOItem }) {
           box-shadow: 2px 2px 0 var(--shadow-color);
           transform: rotate(3deg);
           transition: all 0.2s ease;
-        }
-
-        .card:hover .card-tag {
-          transform: rotate(-2deg) scale(1.05);
-          background: var(--accent);
         }
 
         .card-body {
@@ -192,28 +196,14 @@ export default function CWOCard({ item }: { item: CWOItem }) {
           border-radius: 0.4em;
           box-shadow: 3px 3px 0 var(--shadow-color);
           cursor: pointer;
-          transition: all 0.1s ease;
           text-transform: uppercase;
           letter-spacing: 0.05em;
         }
 
-        .card-button:hover {
-          background: var(--accent);
-          transform: translate(-2px, -2px);
-          box-shadow: 5px 5px 0 var(--shadow-color);
-        }
-
-        .card-button:active {
-          transform: translate(2px, 2px);
-          box-shadow: 1px 1px 0 var(--shadow-color);
-        }
-
         .dots-pattern {
           position: absolute;
-          bottom: 1em;
-          right: 1em;
-          width: 6em;
-          height: 3em;
+          bottom: 1em; right: 1em;
+          width: 6em; height: 3em;
           opacity: 0.2;
           pointer-events: none;
           z-index: 1;
@@ -221,20 +211,14 @@ export default function CWOCard({ item }: { item: CWOItem }) {
 
         .accent-shape {
           position: absolute;
-          width: 2em;
-          height: 2em;
+          width: 2em; height: 2em;
           background: var(--accent);
           border: 2px solid var(--text-color);
           border-radius: 0.3em;
           transform: rotate(45deg);
-          bottom: -1em;
-          right: 3em;
+          bottom: -1em; right: 3em;
           z-index: 0;
           transition: transform 0.3s ease;
-        }
-
-        .card:hover .accent-shape {
-          transform: rotate(90deg) scale(1.2);
         }
       `}</style>
     </div>
