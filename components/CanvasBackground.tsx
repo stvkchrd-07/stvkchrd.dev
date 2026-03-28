@@ -35,8 +35,28 @@ function ParticleField() {
       }
     };
 
+    // FIX: iOS 13+ requires explicit permission triggered by a user action
+    const requestGyroPermission = () => {
+      if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
+        (DeviceOrientationEvent as any).requestPermission()
+          .then((permissionState: string) => {
+            if (permissionState === 'granted') {
+              window.addEventListener('deviceorientation', handleOrientation);
+            }
+          })
+          .catch(console.error);
+      } else {
+        // Android or non-iOS devices
+        window.addEventListener('deviceorientation', handleOrientation);
+      }
+    };
+
     window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('deviceorientation', handleOrientation);
+    
+    // Trigger gyro permission on the user's very first click or tap
+    window.addEventListener('click', requestGyroPermission, { once: true });
+    window.addEventListener('touchstart', requestGyroPermission, { once: true });
+
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('deviceorientation', handleOrientation);
@@ -64,7 +84,8 @@ function ParticleField() {
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
-      <pointsMaterial size={0.03} color="#888888" transparent opacity={0.6} sizeAttenuation={true} />
+      {/* FIX: Pure White particles, 100% opacity, slightly larger (0.05) */}
+      <pointsMaterial size={0.05} color="#FFFFFF" transparent opacity={1.0} sizeAttenuation={true} />
     </points>
   );
 }
@@ -72,7 +93,6 @@ function ParticleField() {
 export default function CanvasBackground() {
   return (
     <div className="fixed inset-0 z-0 bg-transparent pointer-events-none">
-      {/* PERFORMANCE FIX: Clamp DPR to max 1.5 to prevent massive lag on high-res mobile screens */}
       <Canvas camera={{ position: [0, 0, 5], fov: 60 }} dpr={[1, 1.5]} performance={{ min: 0.5 }}>
         <ParticleField />
       </Canvas>

@@ -4,31 +4,23 @@ import CWOCard from '@/components/CWOCard';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import * as motion from "framer-motion/client";
 
-const sampleCWO = [
-  { id: 1, title: 'TheCommonCo', tag: 'Merch', description: 'Scaling bulk corporate merch orders. We deliver and ship fast quick.', status: 'Active' },
-  { id: 2, title: 'Sirenn', tag: 'Luxury', description: 'Building the brand identity and early product line for a future luxury streetwear label.', status: 'Building' }
-];
-
-const sampleProjects = [
-  { id: 1, title: 'UtilityHub', subtitle: 'Browser Utilities', description: '', imageUrl: '', liveUrl: '#' },
-  { id: 2, title: 'Toefury', subtitle: 'E-commerce', description: '', imageUrl: '', liveUrl: '#' },
-  { id: 3, title: 'SurFlow Events', subtitle: 'Event Management', description: '', imageUrl: '', liveUrl: '#' },
-  { id: 4, title: 'Portfolio Core', subtitle: 'Architecture', description: '', imageUrl: '', liveUrl: '#' }
-];
+// FIX: This forces Next.js to always fetch fresh data from Supabase instead of caching it!
+export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
   const supabase = createServerSupabaseClient();
   const { data: projects } = await supabase.from('projects').select('*').order('id', { ascending: false });
   const { data: workingOn } = await supabase.from('working_on').select('*').order('id', { ascending: false });
 
-  const displayProjects = projects && projects.length > 0 ? projects : sampleProjects;
-  const displayCWO = workingOn && workingOn.length > 0 ? workingOn : sampleCWO;
+  // Fallbacks if DB is empty
+  const displayProjects = projects && projects.length > 0 ? projects : [];
+  const displayCWO = workingOn && workingOn.length > 0 ? workingOn : [];
 
   return (
     <>
       <SiteHeader active="home" />
       
-      {/* Statement block - Ultra Minimal Single Line */}
+      {/* Ultra Minimal Single Line */}
       <div className="mb-10 text-center opacity-40">
         <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.5em] whitespace-nowrap">
           PIVOT &bull; EXPERIMENT &bull; <span className="text-[var(--accent-color)]">SHIP</span> &bull; SCALE
