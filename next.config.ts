@@ -1,9 +1,10 @@
-import type { NextConfig } from 'next';
+import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  images: {
-    remotePatterns: [{ protocol: 'https', hostname: '**' }]
-  }
+  eslint: {
+    // This bypasses the circular JSON bug in Next 15 during Vercel builds
+    ignoreDuringBuilds: true,
+  },
 };
 
 export default nextConfig;
