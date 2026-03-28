@@ -62,7 +62,6 @@ function ParticleField() {
   return (
     <points ref={pointsRef}>
       <bufferGeometry>
-        {/* FIX: Using args={[positions, 3]} instead of separate props */}
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
       <pointsMaterial size={0.03} color="#888888" transparent opacity={0.6} sizeAttenuation={true} />
@@ -73,7 +72,8 @@ function ParticleField() {
 export default function CanvasBackground() {
   return (
     <div className="fixed inset-0 z-0 bg-transparent pointer-events-none">
-      <Canvas camera={{ position: [0, 0, 5], fov: 60 }}>
+      {/* PERFORMANCE FIX: Clamp DPR to max 1.5 to prevent massive lag on high-res mobile screens */}
+      <Canvas camera={{ position: [0, 0, 5], fov: 60 }} dpr={[1, 1.5]} performance={{ min: 0.5 }}>
         <ParticleField />
       </Canvas>
     </div>

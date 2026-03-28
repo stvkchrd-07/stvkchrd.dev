@@ -13,20 +13,30 @@ interface CWOItem {
 
 export default function CWOSlider({ items }: { items: CWOItem[] }) {
   const [current, setCurrent] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const touchStartX = useRef(0);
 
   const go = (index: number) => setCurrent(index);
 
   useEffect(() => {
+    // If user is hovering or touching, do not auto-scroll
+    if (isPaused) return;
+
     intervalRef.current = setInterval(() => {
       setCurrent(prev => (prev + 1) % items.length);
     }, 5000);
+    
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [items.length]);
+  }, [items.length, isPaused]);
 
-  const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
+  const onTouchStart = (e: React.TouchEvent) => { 
+    setIsPaused(true);
+    touchStartX.current = e.touches[0].clientX; 
+  };
+  
   const onTouchEnd = (e: React.TouchEvent) => {
+    setIsPaused(false);
     const diff = touchStartX.current - e.changedTouches[0].clientX;
     if (Math.abs(diff) > 40) {
       setCurrent(prev => diff > 0 ? Math.min(prev + 1, items.length - 1) : Math.max(prev - 1, 0));
@@ -34,11 +44,15 @@ export default function CWOSlider({ items }: { items: CWOItem[] }) {
   };
 
   return (
-    <div className="relative overflow-hidden strict-border bg-[var(--card-bg)]">
+    <div 
+      className="relative overflow-hidden strict-border bg-[var(--card-bg)]"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
       <motion.div 
         className="flex"
         animate={{ x: `-${current * 100}%` }}
-        transition={{ duration: 0.15, ease: "linear" }}
+        transition={{ duration: 0.2, ease: "easeInOut" }} /* Smoother slide curve */
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >

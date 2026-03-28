@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, Lora } from 'next/font/google';
 import CanvasBackground from '@/components/CanvasBackground';
 import LoadingScreen from '@/components/LoadingScreen';
+import SmoothScroll from '@/components/SmoothScroll';
 import '@/styles/globals.css';
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '700', '900'], variable: '--font-inter' });
@@ -18,9 +19,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${inter.variable} ${lora.variable} font-sans p-4 md:p-8 dark`}>
         <LoadingScreen />
         <CanvasBackground />
-        <div className="content-wrapper max-w-7xl mx-auto">
-          {children}
-        </div>
+        <SmoothScroll>
+          <div className="content-wrapper max-w-7xl mx-auto">
+            {children}
+          </div>
+        </SmoothScroll>
       </body>
     </html>
   );
