@@ -9,10 +9,11 @@ function ParticleField() {
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [gyro, setGyro] = useState({ alpha: 0, beta: 0, gamma: 0 });
 
+  // REDUCED PARTICLES: 2000 -> 400 for ultra-minimal look
   const [positions, phases] = useMemo(() => {
-    const pos = new Float32Array(2000 * 3);
-    const ph = new Float32Array(2000);
-    for (let i = 0; i < 2000; i++) {
+    const pos = new Float32Array(400 * 3);
+    const ph = new Float32Array(400);
+    for (let i = 0; i < 400; i++) {
       pos[i * 3] = (Math.random() - 0.5) * 15;
       pos[i * 3 + 1] = (Math.random() - 0.5) * 15;
       pos[i * 3 + 2] = (Math.random() - 0.5) * 15;
@@ -23,37 +24,23 @@ function ParticleField() {
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      setMouse({
-        x: (e.clientX / window.innerWidth) * 2 - 1,
-        y: -(e.clientY / window.innerHeight) * 2 + 1,
-      });
+      setMouse({ x: (e.clientX / window.innerWidth) * 2 - 1, y: -(e.clientY / window.innerHeight) * 2 + 1 });
     };
-
     const handleOrientation = (e: DeviceOrientationEvent) => {
-      if (e.beta && e.gamma) {
-        setGyro({ alpha: e.alpha || 0, beta: e.beta, gamma: e.gamma });
-      }
+      if (e.beta && e.gamma) setGyro({ alpha: e.alpha || 0, beta: e.beta, gamma: e.gamma });
     };
 
-    // FIX: iOS 13+ requires explicit permission triggered by a user action
     const requestGyroPermission = () => {
       if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
-        (DeviceOrientationEvent as any).requestPermission()
-          .then((permissionState: string) => {
-            if (permissionState === 'granted') {
-              window.addEventListener('deviceorientation', handleOrientation);
-            }
-          })
-          .catch(console.error);
+        (DeviceOrientationEvent as any).requestPermission().then((state: string) => {
+            if (state === 'granted') window.addEventListener('deviceorientation', handleOrientation);
+          }).catch(console.error);
       } else {
-        // Android or non-iOS devices
         window.addEventListener('deviceorientation', handleOrientation);
       }
     };
 
     window.addEventListener('mousemove', handleMouseMove);
-    
-    // Trigger gyro permission on the user's very first click or tap
     window.addEventListener('click', requestGyroPermission, { once: true });
     window.addEventListener('touchstart', requestGyroPermission, { once: true });
 
@@ -66,17 +53,17 @@ function ParticleField() {
   useFrame((state) => {
     if (!pointsRef.current) return;
     const positionsAttr = pointsRef.current.geometry.attributes.position;
-    for (let i = 0; i < 2000; i++) {
+    for (let i = 0; i < 400; i++) {
       positionsAttr.getY(i); 
       const x = positionsAttr.getX(i);
       const z = positionsAttr.getZ(i);
-      positionsAttr.setY(i, Math.sin(state.clock.elapsedTime * 0.5 + x + z) * 0.5 + (Math.sin(phases[i]) * 5));
+      positionsAttr.setY(i, Math.sin(state.clock.elapsedTime * 0.3 + x + z) * 0.5 + (Math.sin(phases[i]) * 5));
     }
     positionsAttr.needsUpdate = true;
-    const targetX = gyro.beta ? gyro.beta * 0.01 : mouse.y * 0.2;
-    const targetY = gyro.gamma ? gyro.gamma * 0.01 : mouse.x * 0.2;
+    const targetX = gyro.beta ? gyro.beta * 0.01 : mouse.y * 0.1;
+    const targetY = gyro.gamma ? gyro.gamma * 0.01 : mouse.x * 0.1;
     pointsRef.current.rotation.x = THREE.MathUtils.lerp(pointsRef.current.rotation.x, targetX, 0.05);
-    pointsRef.current.rotation.y = THREE.MathUtils.lerp(pointsRef.current.rotation.y, targetY + state.clock.elapsedTime * 0.05, 0.05);
+    pointsRef.current.rotation.y = THREE.MathUtils.lerp(pointsRef.current.rotation.y, targetY + state.clock.elapsedTime * 0.02, 0.05);
   });
 
   return (
@@ -84,8 +71,8 @@ function ParticleField() {
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
-      {/* FIX: Pure White particles, 100% opacity, slightly larger (0.05) */}
-      <pointsMaterial size={0.05} color="#FFFFFF" transparent opacity={1.0} sizeAttenuation={true} />
+      {/* MINIMAL STYLE: Size 0.02, Opacity 0.3 */}
+      <pointsMaterial size={0.02} color="#FFFFFF" transparent opacity={0.3} sizeAttenuation={true} />
     </points>
   );
 }
