@@ -1,6 +1,7 @@
 'use client';
 
-import { ReactLenis } from '@studio-freight/react-lenis';
+// The new, official import path for React
+import { ReactLenis } from 'lenis/react';
 
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
   return (
