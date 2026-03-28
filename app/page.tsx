@@ -2,6 +2,7 @@ import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import CWOSlider from '@/components/CWOSlider';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import * as motion from "framer-motion/client";
 
 const sampleCWO = [
   { id: 1, title: 'TheCommonCo', tag: 'Streetwear / Merch', description: 'Scaling bulk corporate merch orders. Working on overseas pricing models and influencer outreach campaigns.', status: 'Active' },
@@ -43,13 +44,16 @@ export default async function HomePage() {
           <h2 className="font-black text-4xl md:text-5xl mb-6">Projects</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {displayProjects.map((project) => (
-              <div
+              <motion.div
                 key={project.id}
+                whileHover={{ scale: 1.02, y: -4 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 className="brutalist-hover border-2 border-black p-6 bg-white/80 backdrop-blur-sm cursor-pointer"
               >
                 <h3 className="font-black text-2xl md:text-3xl">{project.title}</h3>
                 <p className="mt-1 text-base">{project.subtitle}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
           <div className="h-32 md:h-64 lg:h-96" />
