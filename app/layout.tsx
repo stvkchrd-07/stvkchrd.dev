@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Lora } from 'next/font/google';
 import CanvasBackground from '@/components/CanvasBackground';
+import LoadingScreen from '@/components/LoadingScreen';
 import '@/styles/globals.css';
 
-const inter = Inter({ subsets: ['latin'], weight: ['400', '900'] });
+const inter = Inter({ subsets: ['latin'], weight: ['400', '700', '900'], variable: '--font-inter' });
+const lora = Lora({ subsets: ['latin'], weight: ['400', '600'], variable: '--font-lora' });
 
 export const metadata: Metadata = {
   title: 'Satvik Chaturvedi',
@@ -13,7 +15,8 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} p-4 md:p-8 dark`}>
+      <body className={`${inter.variable} ${lora.variable} font-sans p-4 md:p-8 dark`}>
+        <LoadingScreen />
         <CanvasBackground />
         <div className="content-wrapper max-w-7xl mx-auto">
           {children}

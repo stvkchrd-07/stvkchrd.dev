@@ -8,6 +8,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.5.0",
     "@supabase/supabase-js": "^2.57.4",
     "framer-motion": "^12.38.0",
     "marked": "^16.4.1",

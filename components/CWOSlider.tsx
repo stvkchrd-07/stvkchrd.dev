@@ -21,7 +21,7 @@ export default function CWOSlider({ items }: { items: CWOItem[] }) {
   useEffect(() => {
     intervalRef.current = setInterval(() => {
       setCurrent(prev => (prev + 1) % items.length);
-    }, 4000);
+    }, 5000);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [items.length]);
 
@@ -34,39 +34,36 @@ export default function CWOSlider({ items }: { items: CWOItem[] }) {
   };
 
   return (
-    <div className="relative overflow-hidden border-2 border-[var(--text-color)] group mb-12">
+    <div className="relative overflow-hidden strict-border bg-[var(--card-bg)]">
       <motion.div 
         className="flex"
         animate={{ x: `-${current * 100}%` }}
-        transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
+        transition={{ duration: 0.15, ease: "linear" }}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
         {items.map((item) => (
-          <div key={item.id} className="min-w-full p-8 md:p-10 bg-[var(--card-bg)] flex flex-col gap-3 min-h-[220px] justify-center">
-            <span className="text-xs font-black tracking-[0.15em] uppercase opacity-60">
-              {item.tag}
-            </span>
-            <h3 className="font-black text-3xl md:text-4xl">{item.title}</h3>
-            <p className="text-base md:text-lg leading-relaxed opacity-90 max-w-3xl mt-2 flex-1">
+          <div key={item.id} className="min-w-full p-5 md:p-8 flex flex-col gap-2 min-h-[180px] justify-center strict-hover cursor-grab active:cursor-grabbing">
+            <div className="flex justify-between items-start">
+              <h3 className="font-black text-2xl md:text-4xl tracking-tighter uppercase leading-none">{item.title}</h3>
+              <span className="text-[10px] md:text-xs font-black tracking-widest uppercase bg-[var(--accent-color)] text-black px-2 py-0.5 strict-border">
+                {item.tag}
+              </span>
+            </div>
+            <p className="text-sm md:text-base font-bold leading-snug max-w-3xl mt-2">
               {item.description}
             </p>
-            {item.status && (
-              <span className="inline-block mt-4 px-4 py-1.5 text-xs font-black uppercase tracking-widest border-2 border-[var(--text-color)] w-max">
-                {item.status}
-              </span>
-            )}
           </div>
         ))}
       </motion.div>
 
-      <div className="absolute bottom-5 left-0 right-0 flex justify-center gap-3">
+      <div className="absolute bottom-3 left-4 flex gap-2">
         {items.map((_, i) => (
           <button
             key={i}
             onClick={() => go(i)}
-            className={`w-3 h-3 border-2 border-[var(--text-color)] transition-colors duration-150 ${
-              i === current ? 'bg-[var(--text-color)]' : 'bg-transparent'
+            className={`w-6 h-1.5 strict-border transition-none ${
+              i === current ? 'bg-[var(--accent-color)]' : 'bg-[var(--bg-color)]'
             }`}
           />
         ))}
