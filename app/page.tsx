@@ -30,29 +30,27 @@ export default async function HomePage() {
   return (
     <>
       <SiteHeader active="home" />
-      <p className="pivot-experiment mt-2">Pivot &middot; Experiment &middot; Ship &middot; Scale</p>
+      <p className="pivot-experiment mt-2 font-black uppercase tracking-wide opacity-80">Pivot &middot; Experiment &middot; Ship &middot; Scale</p>
 
       <main className="grid grid-cols-1 gap-8 md:gap-12 mt-12">
-        {/* Currently Working On */}
         <section id="currently-working-on" className="mb-4">
           <h2 className="font-black text-4xl md:text-5xl mb-6">Currently Working On</h2>
           <CWOSlider items={displayCWO} />
         </section>
 
-        {/* Projects */}
         <section id="projects">
           <h2 className="font-black text-4xl md:text-5xl mb-6">Projects</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {displayProjects.map((project) => (
               <motion.div
                 key={project.id}
-                whileHover={{ scale: 1.02, y: -4 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                className="brutalist-hover border-2 border-black p-6 bg-white/80 backdrop-blur-sm cursor-pointer"
+                whileHover={{ y: -6 }}
+                whileTap={{ y: 0 }}
+                transition={{ duration: 0.15, ease: "easeOut" as const }}
+                className="border-2 border-[var(--text-color)] p-8 bg-[var(--card-bg)] backdrop-blur-sm cursor-pointer brutalist-hover"
               >
                 <h3 className="font-black text-2xl md:text-3xl">{project.title}</h3>
-                <p className="mt-1 text-base">{project.subtitle}</p>
+                <p className="mt-2 text-base opacity-80">{project.subtitle}</p>
               </motion.div>
             ))}
           </div>

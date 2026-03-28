@@ -3,21 +3,21 @@
 @tailwind utilities;
 
 :root {
-    --bg-color: #FFFFFF;
-    --text-color: #000000;
-    --card-bg: rgba(255, 255, 255, 0.8);
-    --brutalist-hover-bg: #000000;
-    --brutalist-hover-text: #FFFFFF;
-    --particle-color-value: #000000;
+    --bg-color: #F4F4F5;
+    --text-color: #09090B;
+    --card-bg: rgba(244, 244, 245, 0.85);
+    --brutalist-hover-bg: #09090B;
+    --brutalist-hover-text: #F4F4F5;
+    --particle-color-value: #09090B;
 }
 
 body.dark {
-    --bg-color: #111111;
-    --text-color: #FFFFFF;
-    --card-bg: rgba(30, 30, 30, 0.8);
-    --brutalist-hover-bg: #FFFFFF;
-    --brutalist-hover-text: #000000;
-    --particle-color-value: #ffffff;
+    --bg-color: #09090B;
+    --text-color: #FAFAFA;
+    --card-bg: rgba(9, 9, 11, 0.85);
+    --brutalist-hover-bg: #FAFAFA;
+    --brutalist-hover-text: #09090B;
+    --particle-color-value: #FAFAFA;
 }
 
 body {
@@ -25,8 +25,7 @@ body {
     background-color: var(--bg-color);
     color: var(--text-color);
     overflow-x: hidden;
-    /* Spring-like smooth background transitions */
-    transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    line-height: 1.6;
 }
 
 * { border-radius: 0 !important; }
@@ -41,4 +40,10 @@ body {
 .content-wrapper {
     position: relative;
     z-index: 1;
+}
+
+.brutalist-hover { transition: none; }
+.brutalist-hover:hover {
+    background-color: var(--brutalist-hover-bg) !important;
+    color: var(--brutalist-hover-text) !important;
 }
