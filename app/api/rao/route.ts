@@ -3,26 +3,25 @@ import { NextResponse } from 'next/server';
 export async function POST(req: Request) {
   try {
     const { text } = await req.json();
+    const apiKey = process.env.ELEVENLABS_API_KEY;
 
-    if (!process.env.ELEVENLABS_API_KEY) {
-      return NextResponse.json({ error: "Missing ElevenLabs API Key" }, { status: 500 });
+    if (!apiKey) {
+      console.error("SERVER ERROR: ELEVENLABS_API_KEY is missing. Did you restart the server?");
+      return NextResponse.json({ error: "Missing ElevenLabs API Key in .env.local" }, { status: 500 });
     }
 
-    // You can change this to a specific Indian Male Voice ID from your ElevenLabs dashboard
-    const VOICE_ID = "pNInz6obbfIdG4L1peC2"; // Placeholder Adam voice. Replace with your custom Hinglish voice ID.
+    const VOICE_ID = "pNInz6obbfIdG4L1peC2"; // Standard Adam voice, handles Hinglish well
     
-    // Call ElevenLabs API
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}/stream`, {
       method: 'POST',
       headers: {
         'Accept': 'audio/mpeg',
-        'xi-api-key': process.env.ELEVENLABS_API_KEY,
+        'xi-api-key': apiKey,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         text: text,
-        // Turbo v2.5 is the best model for switching smoothly between Hindi and English
-        model_id: "eleven_turbo_v2_5",
+        model_id: "eleven_multilingual_v2",
         voice_settings: {
           stability: 0.5,
           similarity_boost: 0.75,
@@ -31,17 +30,23 @@ export async function POST(req: Request) {
     });
 
     if (!response.ok) {
-      throw new Error(`ElevenLabs API error: ${response.statusText}`);
+      const errorData = await response.text();
+      console.error("ELEVENLABS API ERROR:", errorData);
+      return NextResponse.json({ error: `ElevenLabs Error: ${errorData}` }, { status: response.status });
     }
 
     const audioBuffer = await response.arrayBuffer();
     
-    return new NextResponse(audioBuffer, {
-      headers: { 'Content-Type': 'audio/mpeg' }
+    // Use standard Response (instead of NextResponse) for raw binary audio in Next.js 15
+    return new Response(audioBuffer, {
+      headers: {
+        'Content-Type': 'audio/mpeg',
+        'Cache-Control': 'no-store, max-age=0',
+      }
     });
 
-  } catch (error) {
-    console.error("RAO AI Error:", error);
-    return NextResponse.json({ error: "Voice generation failed." }, { status: 500 });
+  } catch (error: any) {
+    console.error("CRITICAL RAO AI Error:", error);
+    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
   }
 }
