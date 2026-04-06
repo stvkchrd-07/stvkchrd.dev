@@ -1,3 +1,149 @@
+#!/bin/bash
+
+echo "⚡ Upgrading to Full-Fledged Production Build..."
+
+# Install lucide-react for sharp, minimalist icons
+npm install lucide-react
+
+mkdir -p config
+
+# 1. Create a Central Site Config
+cat << 'EOF' > config/site.ts
+export const siteConfig = {
+  name: "Satvik Chaturvedi",
+  role: "Engineer. Architect. Founder.",
+  status: "Shipping Active",
+  description: "Building scalable intelligent systems and driving high-impact ventures. Clean code. Sharp execution.",
+  links: {
+    resume: "/resume.pdf",
+    twitter: "https://x.com/your_twitter_handle",
+    linkedin: "https://linkedin.com/in/your_linkedin_handle",
+    github: "https://github.com/your_github_handle"
+  },
+  adminPin: process.env.NEXT_PUBLIC_ADMIN_PIN || "0000" // Default pin if env not set
+};
+EOF
+
+# 2. Make Supabase Clients Safe (Won't crash if env is missing during build)
+cat << 'EOF' > lib/supabase/server.ts
+import { createClient } from '@supabase/supabase-js';
+
+export function createServerSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn("⚠️ Supabase credentials missing. Returning dummy client.");
+    // Return a dummy client that safely fails queries instead of crashing the app
+    return { from: () => ({ select: () => ({ order: () => ({ data: [], error: { message: "No DB configuration" } }) }) }) } as any;
+  }
+
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    auth: { persistSession: false, autoRefreshToken: false }
+  });
+}
+EOF
+
+cat << 'EOF' > lib/supabase/client.ts
+import { createClient } from '@supabase/supabase-js';
+
+export const createBrowserClient = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+  return createClient(supabaseUrl, supabaseAnonKey);
+};
+EOF
+
+# 3. Update Home Page to use Config and handle DB errors gracefully
+cat << 'EOF' > app/page.tsx
+import SiteHeader from '@/components/SiteHeader';
+import SiteFooter from '@/components/SiteFooter';
+import LabSection from '@/components/LabSection';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { siteConfig } from '@/config/site';
+import { Github, Twitter, Linkedin } from 'lucide-react';
+
+export const dynamic = 'force-dynamic';
+
+export default async function HomePage() {
+  const supabase = createServerSupabaseClient();
+  
+  // Safe fetch with error handling
+  const { data: workingOn, error } = await supabase
+    .from('working_on')
+    .select('*')
+    .order('id', { ascending: false });
+
+  if (error) {
+    console.error("Database fetch error:", error);
+  }
+
+  const displayProjects = workingOn && workingOn.length > 0 ? workingOn : [];
+
+  return (
+    <>
+      <SiteHeader active="home" />
+
+      <main className="grid grid-cols-1 gap-12 md:gap-16 mt-8">
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
+          <div className="col-span-1 lg:col-span-8 neo-card p-6 md:p-12 flex flex-col justify-between min-h-[40vh]">
+            <div>
+              <p className="font-pixel text-electric text-lg md:text-2xl mb-4 uppercase tracking-widest bg-text text-bg inline-block px-2 py-1">
+                &gt; System.Init()
+              </p>
+              <h1 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none mb-6">
+                Engineer.<br />
+                <span className="text-lime" style={{ WebkitTextStroke: '1px var(--text-color)' }}>Architect.</span><br />
+                Founder.
+              </h1>
+            </div>
+            <p className="max-w-md font-medium text-base md:text-lg leading-snug">
+              {siteConfig.description}
+            </p>
+          </div>
+
+          <div className="col-span-1 lg:col-span-4 flex flex-col gap-4 md:gap-6">
+            <div className="neo-card p-6 flex flex-col justify-center items-center bg-lime text-black border-black">
+              <h3 className="font-black text-2xl uppercase text-center">Status</h3>
+              <p className="font-pixel text-lg mt-2 text-center bg-black text-lime px-3 py-1">{siteConfig.status}</p>
+            </div>
+            
+            {/* DYNAMIC LINKED BUTTONS */}
+            <div className="neo-card p-6 flex flex-col gap-3 justify-center bg-electric text-white border-black">
+               <a href={siteConfig.links.resume} target="_blank" rel="noopener noreferrer" className="neo-btn text-center bg-white text-black px-4 py-3 w-full border-black hover:bg-lime hover:scale-[1.02] active:scale-95 text-lg block font-bold">
+                 View Resume
+               </a>
+               <div className="flex gap-3">
+                 <a href={siteConfig.links.twitter} target="_blank" rel="noopener noreferrer" className="neo-btn flex items-center justify-center flex-1 bg-black text-white py-3 border-white hover:bg-lime hover:text-black hover:border-black active:scale-95">
+                   <Twitter size={20} />
+                 </a>
+                 <a href={siteConfig.links.linkedin} target="_blank" rel="noopener noreferrer" className="neo-btn flex items-center justify-center flex-1 bg-black text-white py-3 border-white hover:bg-lime hover:text-black hover:border-black active:scale-95">
+                   <Linkedin size={20} />
+                 </a>
+                 <a href={siteConfig.links.github} target="_blank" rel="noopener noreferrer" className="neo-btn flex items-center justify-center flex-1 bg-black text-white py-3 border-white hover:bg-lime hover:text-black hover:border-black active:scale-95">
+                   <Github size={20} />
+                 </a>
+               </div>
+            </div>
+          </div>
+        </section>
+
+        {error ? (
+          <div className="neo-card p-8 bg-red-500 text-white font-pixel text-center text-xl">
+             [ DATABASE CONNECTION FAILED ]
+          </div>
+        ) : (
+          <LabSection projects={displayProjects} />
+        )}
+      </main>
+      <SiteFooter />
+    </>
+  );
+}
+EOF
+
+# 4. Completely Overhaul Admin Page (Auth + Read + Delete + Create)
+cat << 'EOF' > app/admin/page.tsx
 "use client";
 import { useState, useEffect } from 'react';
 import SiteHeader from '@/components/SiteHeader';
@@ -197,3 +343,10 @@ export default function AdminPage() {
     </>
   );
 }
+EOF
+
+echo "✅ Update Complete!"
+echo "⚠️ IMPORTANT NEXT STEPS:"
+echo "1. Go to 'config/site.ts' to input your actual Twitter/LinkedIn URLs."
+echo "2. Add 'NEXT_PUBLIC_ADMIN_PIN=1234' to your .env.local (Default is 0000)."
+echo "3. Restart your dev server with 'npm run dev'."
