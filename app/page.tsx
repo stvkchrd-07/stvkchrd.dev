@@ -1,70 +1,77 @@
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
-import CWOCard from '@/components/CWOCard';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
-import * as motion from "framer-motion/client";
+import LabSection from '@/components/LabSection';
+import Link from 'next/link';
+// import { createServerSupabaseClient } from '@/lib/supabase/server'; // Uncomment when ready
 
-// FIX: This forces Next.js to always fetch fresh data from Supabase instead of caching it!
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  const supabase = createServerSupabaseClient();
-  const { data: projects } = await supabase.from('projects').select('*').order('id', { ascending: false });
-  const { data: workingOn } = await supabase.from('working_on').select('*').order('id', { ascending: false });
-
-  // Fallbacks if DB is empty
-  const displayProjects = projects && projects.length > 0 ? projects : [];
-  const displayCWO = workingOn && workingOn.length > 0 ? workingOn : [];
+  // MOCK DATA: Replace with actual Supabase fetch later
+  // e.g. const { data } = await supabase.from('working_on').select('*');
+  const fallbackProjects = [
+    { 
+      id: 1, 
+      title: "The Common Co.", 
+      description: "Comfort-driven streetwear handling bulk merchandise for societies and companies. Scheduled for launch April 2026.", 
+      image_url: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=800", 
+      project_url: "https://thecommonco.com" 
+    },
+    { 
+      id: 2, 
+      title: "UtilityHub", 
+      description: "A browser-based website with pure client-side utility tools. Built with Next.js and Tailwind CSS.", 
+      image_url: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800", 
+      project_url: "https://github.com" 
+    },
+    { 
+      id: 3, 
+      title: "Smart Health Sys", 
+      description: "Surveillance and Early Warning System to detect outbreaks of water-borne diseases in vulnerable communities.", 
+      image_url: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800", 
+      project_url: "#" 
+    }
+  ];
 
   return (
     <>
       <SiteHeader active="home" />
-      
-      {/* Ultra Minimal Single Line */}
-      <div className="mb-10 text-center opacity-40">
-        <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.5em] whitespace-nowrap">
-          PIVOT &bull; EXPERIMENT &bull; <span className="text-[var(--accent-color)]">SHIP</span> &bull; SCALE
-        </p>
-      </div>
 
-      <main className="grid grid-cols-1 gap-10 md:gap-14">
-        <section id="currently-working-on">
-          <div className="flex justify-between items-end border-b-[2px] border-[var(--text-color)] pb-2 mb-4">
-            <h2 className="font-black text-2xl md:text-3xl tracking-tighter uppercase leading-none">Focus</h2>
-            <span className="font-black text-xs md:text-sm text-[var(--accent-color)] bg-[var(--text-color)] px-2">LIVE</span>
+      <main className="grid grid-cols-1 gap-12 md:gap-16 mt-8">
+        {/* SERIOUS SECTION */}
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
+          <div className="col-span-1 lg:col-span-8 neo-card p-6 md:p-12 flex flex-col justify-between min-h-[40vh]">
+            <div>
+              <p className="font-pixel text-electric text-lg md:text-2xl mb-4 uppercase tracking-widest bg-text text-bg inline-block px-2 py-1">
+                &gt; System.Init()
+              </p>
+              <h1 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none mb-6">
+                Engineer.<br />
+                <span className="text-lime" style={{ WebkitTextStroke: '1px var(--text-color)' }}>Architect.</span><br />
+                Founder.
+              </h1>
+            </div>
+            <p className="max-w-md font-medium text-base md:text-lg leading-snug">
+              Building scalable intelligent systems and driving high-impact ventures. Clean code. Sharp execution.
+            </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {displayCWO.map(item => (
-              <CWOCard key={item.id} item={item} />
-            ))}
+
+          <div className="col-span-1 lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-4 md:gap-6">
+            <div className="neo-card p-6 flex-1 flex flex-col justify-center items-center bg-lime text-black border-black">
+              <h3 className="font-black text-2xl uppercase text-center">Status</h3>
+              <p className="font-pixel text-lg mt-2 text-center bg-black text-lime px-3 py-1">Shipping Active</p>
+            </div>
+            <div className="neo-card p-6 flex-1 flex flex-col justify-center bg-electric text-white border-black">
+               <button className="neo-btn bg-white text-black px-4 py-4 w-full border-black hover:bg-lime hover:scale-[1.02] active:scale-95 text-lg">
+                 View Resume
+               </button>
+            </div>
           </div>
         </section>
 
-        <section id="projects">
-          <div className="flex justify-between items-end border-b-[2px] border-[var(--text-color)] pb-2 mb-4">
-            <h2 className="font-black text-2xl md:text-3xl tracking-tighter uppercase leading-none">Projects Section</h2>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-            {displayProjects.map((project) => (
-              <motion.div
-                key={project.id}
-                className="strict-border p-3 md:p-4 bg-[var(--card-bg)] flex flex-col justify-between strict-hover cursor-pointer aspect-square rounded-xl"
-              >
-                <div>
-                  <h3 className="font-black text-base md:text-lg leading-tight mb-1 tracking-tighter uppercase">{project.title}</h3>
-                  <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest border-t-[2px] border-current pt-1 mt-1 opacity-90">{project.subtitle}</p>
-                </div>
-                <div className="self-end bg-[var(--bg-color)] text-[var(--text-color)] px-2 py-0.5 strict-border mt-2 rounded-lg">
-                  <span className="font-black text-xs leading-none">→</span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-          <div className="h-10 md:h-20" />
-        </section>
+        {/* QUIRKY LAB SECTION */}
+        <LabSection projects={fallbackProjects} />
       </main>
-
       <SiteFooter />
     </>
   );
