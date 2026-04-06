@@ -1,23 +1,25 @@
 "use client";
 import { useEffect } from 'react';
+import { motion } from 'framer-motion';
 
 export default function ProjectModal({ project, onClose }: { project: any, onClose: () => void }) {
-  // Close on Escape key press
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
   }, [onClose]);
 
-  if (!project) return null;
-
   return (
     <div 
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" 
       onClick={onClose}
     >
-      <div 
-        className="neo-card bg-bg w-full max-w-3xl max-h-[90vh] overflow-y-auto flex flex-col relative animate-fade-in-up" 
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9, y: 40 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        transition={{ type: "spring", stiffness: 500, damping: 25 }}
+        className="neo-card bg-bg w-full max-w-3xl max-h-[90vh] overflow-y-auto flex flex-col relative" 
         onClick={e => e.stopPropagation()}
       >
         <div className="sticky top-0 bg-bg z-10 flex justify-between items-center p-4 border-b-2 border-text">
@@ -42,7 +44,7 @@ export default function ProjectModal({ project, onClose }: { project: any, onClo
         
         <div className="p-6 md:p-8 flex flex-col md:flex-row gap-8 justify-between items-start">
           <p className="font-medium text-lg md:text-xl flex-1 whitespace-pre-wrap">
-            {project.description || "No description provided."}
+            {project.description}
           </p>
           
           <div className="w-full md:w-auto">
@@ -62,7 +64,7 @@ export default function ProjectModal({ project, onClose }: { project: any, onClo
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

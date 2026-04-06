@@ -1,6 +1,7 @@
 "use client";
 import { useState } from 'react';
 import ProjectModal from './ProjectModal';
+import { AnimatePresence } from 'framer-motion';
 
 export default function LabSection({ projects }: { projects: any[] }) {
   const [selectedProject, setSelectedProject] = useState<any>(null);
@@ -52,7 +53,11 @@ export default function LabSection({ projects }: { projects: any[] }) {
         ))}
       </div>
 
-      <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />
+      <AnimatePresence>
+        {selectedProject && (
+          <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />
+        )}
+      </AnimatePresence>
     </section>
   );
 }

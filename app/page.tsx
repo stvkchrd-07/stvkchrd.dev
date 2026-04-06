@@ -1,44 +1,26 @@
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import LabSection from '@/components/LabSection';
-import Link from 'next/link';
-// import { createServerSupabaseClient } from '@/lib/supabase/server'; // Uncomment when ready
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  // MOCK DATA: Replace with actual Supabase fetch later
-  // e.g. const { data } = await supabase.from('working_on').select('*');
-  const fallbackProjects = [
-    { 
-      id: 1, 
-      title: "The Common Co.", 
-      description: "Comfort-driven streetwear handling bulk merchandise for societies and companies. Scheduled for launch April 2026.", 
-      image_url: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=800", 
-      project_url: "https://thecommonco.com" 
-    },
-    { 
-      id: 2, 
-      title: "UtilityHub", 
-      description: "A browser-based website with pure client-side utility tools. Built with Next.js and Tailwind CSS.", 
-      image_url: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800", 
-      project_url: "https://github.com" 
-    },
-    { 
-      id: 3, 
-      title: "Smart Health Sys", 
-      description: "Surveillance and Early Warning System to detect outbreaks of water-borne diseases in vulnerable communities.", 
-      image_url: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800", 
-      project_url: "#" 
-    }
-  ];
+  const supabase = createServerSupabaseClient();
+  
+  // Fetch real data from the database
+  const { data: workingOn } = await supabase
+    .from('working_on')
+    .select('*')
+    .order('id', { ascending: false });
+
+  const displayProjects = workingOn && workingOn.length > 0 ? workingOn : [];
 
   return (
     <>
       <SiteHeader active="home" />
 
       <main className="grid grid-cols-1 gap-12 md:gap-16 mt-8">
-        {/* SERIOUS SECTION */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
           <div className="col-span-1 lg:col-span-8 neo-card p-6 md:p-12 flex flex-col justify-between min-h-[40vh]">
             <div>
@@ -56,21 +38,32 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <div className="col-span-1 lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-4 md:gap-6">
-            <div className="neo-card p-6 flex-1 flex flex-col justify-center items-center bg-lime text-black border-black">
+          <div className="col-span-1 lg:col-span-4 flex flex-col gap-4 md:gap-6">
+            <div className="neo-card p-6 flex flex-col justify-center items-center bg-lime text-black border-black">
               <h3 className="font-black text-2xl uppercase text-center">Status</h3>
               <p className="font-pixel text-lg mt-2 text-center bg-black text-lime px-3 py-1">Shipping Active</p>
             </div>
-            <div className="neo-card p-6 flex-1 flex flex-col justify-center bg-electric text-white border-black">
-               <button className="neo-btn bg-white text-black px-4 py-4 w-full border-black hover:bg-lime hover:scale-[1.02] active:scale-95 text-lg">
+            
+            {/* LINKED BUTTONS SECTION */}
+            <div className="neo-card p-6 flex flex-col gap-3 justify-center bg-electric text-white border-black">
+               {/* Replace /resume.pdf with your actual resume path if different */}
+               <a href="/resume.pdf" target="_blank" rel="noopener noreferrer" className="neo-btn text-center bg-white text-black px-4 py-3 w-full border-black hover:bg-lime hover:scale-[1.02] active:scale-95 text-lg block">
                  View Resume
-               </button>
+               </a>
+               <div className="flex gap-3">
+                 <a href="https://x.com/your_twitter_handle" target="_blank" rel="noopener noreferrer" className="neo-btn text-center flex-1 bg-black text-white py-3 border-white hover:bg-lime hover:text-black hover:border-black active:scale-95">
+                   [ X ]
+                 </a>
+                 <a href="https://linkedin.com/in/your_linkedin_handle" target="_blank" rel="noopener noreferrer" className="neo-btn text-center flex-1 bg-black text-white py-3 border-white hover:bg-lime hover:text-black hover:border-black active:scale-95">
+                   [ IN ]
+                 </a>
+               </div>
             </div>
           </div>
         </section>
 
-        {/* QUIRKY LAB SECTION */}
-        <LabSection projects={fallbackProjects} />
+        {/* Dynamic Lab Section fetching from Supabase */}
+        <LabSection projects={displayProjects} />
       </main>
       <SiteFooter />
     </>
