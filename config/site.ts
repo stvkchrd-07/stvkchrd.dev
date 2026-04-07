@@ -4,10 +4,11 @@ export const siteConfig = {
   status: "Shipping Active",
   description: "Building scalable intelligent systems and driving high-impact ventures. Clean code. Sharp execution.",
   links: {
-    resume: "/resume.pdf",
+    resume: "/Resume.pdf",
     twitter: "https://x.com/StvkChrd",
     linkedin: "https://www.linkedin.com/in/stvkchrd/",
     github: "https://github.com/stvkchrd-07"
   },
-  adminPin: process.env.NEXT_PUBLIC_ADMIN_PIN || "0000" // Default pin if env not set
+  githubUsername: "stvkchrd-07", // <-- Add your GitHub username here
+  adminPin: process.env.NEXT_PUBLIC_ADMIN_PIN || "0000"
 };

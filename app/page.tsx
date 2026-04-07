@@ -4,6 +4,23 @@ import LabSection from '@/components/LabSection';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { siteConfig } from '@/config/site';
 
+// Fetch live GitHub status (Caches for 1 hour to prevent API limits)
+async function getGithubStatus() {
+  try {
+    const res = await fetch(`https://api.github.com/users/${siteConfig.githubUsername}/events/public`, { next: { revalidate: 3600 } });
+    if (!res.ok) return siteConfig.status;
+    const events = await res.json();
+    const pushEvent = events.find((e: any) => e.type === "PushEvent");
+    if (pushEvent) {
+      const repoName = pushEvent.repo.name.split('/')[1];
+      return `Building: ${repoName}`;
+    }
+    return siteConfig.status;
+  } catch {
+    return siteConfig.status;
+  }
+}
+
 const TwitterIcon = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
@@ -29,12 +46,9 @@ export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
   const supabase = createServerSupabaseClient();
+  const githubStatus = await getGithubStatus();
   
-  const { data: workingOn, error } = await supabase
-    .from('working_on')
-    .select('*')
-    .order('id', { ascending: false });
-
+  const { data: workingOn, error } = await supabase.from('working_on').select('*').order('id', { ascending: false });
   if (error) console.error("Database fetch error:", error);
 
   const displayProjects = workingOn && workingOn.length > 0 ? workingOn : [];
@@ -42,7 +56,6 @@ export default async function HomePage() {
   return (
     <>
       <SiteHeader active="home" />
-
       <main className="grid grid-cols-1 gap-12 md:gap-16 mt-8 relative z-30">
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
           <div className="col-span-1 lg:col-span-8 neo-card p-6 md:p-12 flex flex-col justify-between min-h-[40vh] relative z-40">
@@ -63,11 +76,11 @@ export default async function HomePage() {
 
           <div className="col-span-1 lg:col-span-4 flex flex-col gap-4 md:gap-6">
             <div className="neo-card p-6 flex flex-col justify-center items-center bg-lime text-black border-black relative z-40">
-              <h3 className="font-black text-2xl uppercase text-center">Status</h3>
-              <p className="font-pixel text-lg mt-2 text-center bg-black text-lime px-3 py-1">{siteConfig.status}</p>
+              <h3 className="font-black text-2xl uppercase text-center">Live Status</h3>
+              {/* LIVE GITHUB API STATUS */}
+              <p className="font-pixel text-lg mt-2 text-center bg-black text-lime px-3 py-1 truncate w-full" title={githubStatus}>{githubStatus}</p>
             </div>
             
-            {/* FIX: Added relative z-50 to ensure this block absolutely stays above everything */}
             <div className="neo-card p-6 flex flex-col gap-3 justify-center bg-electric text-white border-black relative z-50">
                <a href={siteConfig.links.resume} target="_blank" rel="noopener noreferrer" className="neo-btn text-center bg-white text-black px-4 py-3 w-full border-black hover:bg-lime hover:scale-[1.02] active:scale-95 text-lg block font-bold cursor-pointer">
                  View Resume
