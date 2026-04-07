@@ -1,3 +1,8 @@
+#!/bin/bash
+
+echo "🔄 Updating Groq API to the latest Llama 3.1 model..."
+
+cat << 'EOF' > app/api/rao/route.ts
 import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
 
@@ -46,3 +51,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
+EOF
+
+echo "✅ Model updated! The chat will now work perfectly."
